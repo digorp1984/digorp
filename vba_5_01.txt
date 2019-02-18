@@ -1,0 +1,18 @@
+Private Sub but_Click()
+'Обновление основной таблицы
+  
+  DoCmd.DeleteObject acTable, "tblOsnov"
+  CurrentDb.Execute "qwrOsnov"
+  CurrentDb.Execute "qwrOsnov2"
+  DoCmd.Close acForm, "Старт"
+  DoCmd.OpenForm "Меню"
+
+End Sub
+
+--------------qwrOsnov-----------------------
+SELECT IIf(KADR01.CEH='112',KADR01.CEH+'-'+KADR01.UCH,KADR01.CEH) AS CEH2, PK02.NPNN AS nameCEH2, KADR01.KPER, KADR01.PROF, PK47.NPNN AS NAIMPROF, [iPOL_1]+[iPOL_2] AS iPOL, Sum(IIf(nz([pol],"0")="1",1,0)) AS iPOL_1, Sum(IIf(nz([pol],"0")="2",1,0)) AS iPOL_2, [iPOL]-([iTARR_1]+[iTARR_2]+[iTARR_3]+[iTARR_4]+[iTARR_5]+[iTARR_6]+[iTARR_7]+[iTARR_8]) AS iTARR, Sum(IIf(nz([TARR],"00")="01",1,0)) AS iTARR_1, Sum(IIf(nz([TARR],"00")="02",1,0)) AS iTARR_2, Sum(IIf(nz([TARR],"00")="03",1,0)) AS iTARR_3, Sum(IIf(nz([TARR],"00")="04",1,0)) AS iTARR_4, Sum(IIf(nz([TARR],"00")="05",1,0)) AS iTARR_5, Sum(IIf(nz([TARR],"00")="06",1,0)) AS iTARR_6, Sum(IIf(nz([TARR],"00")="07",1,0)) AS iTARR_7, Sum(IIf(nz([TARR],"00")="08",1,0)) AS iTARR_8, Round(Avg(CInt(nz([tarr],0))),2) AS avgTARR, [iPOL]-([iTARCE_10]+[iTARCE_11]+[iTARCE_12]) AS iTARCE, Sum(IIf(nz([TARCE],"00")="10",1,0)) AS iTARCE_10, Sum(IIf(nz([TARCE],"00")="11",1,0)) AS iTARCE_11, Sum(IIf(nz([TARCE],"00")="12",1,0)) AS iTARCE_12, [iPOL]-([iTARCT_12]+[iTARCT_25]) AS iTARCT, Sum(IIf(nz([TARCT],"00")="12",1,0)) AS iTARCT_12, Sum(IIf(nz([TARCT],"00")="25",1,0)) AS iTARCT_25, [iPOL]-([iUCTRU_1]+[iUCTRU_2]+[iUCTRU_3]+[iUCTRU_4]+[iUCTRU_8]) AS iUCTRU, Sum(IIf(nz([UCTRU],"0")="1",1,0)) AS iUCTRU_1, Sum(IIf(nz([UCTRU],"0")="2",1,0)) AS iUCTRU_2, Sum(IIf(nz([UCTRU],"0")="3",1,0)) AS iUCTRU_3, Sum(IIf(nz([UCTRU],"0")="4",1,0)) AS iUCTRU_4, Sum(IIf(nz([UCTRU],"0")="8",1,0)) AS iUCTRU_8, [iPOL]-([iOTPUCK_00281]+[iOTPUCK_07281]+[iOTPUCK_14281]+[iOTPUCK_14282]) AS iOTPUCK, Sum(IIf(nz([OTPUCK],"00000")="00281",1,0)) AS iOTPUCK_00281, Sum(IIf(nz([OTPUCK],"00000")="07281",1,0)) AS iOTPUCK_07281, Sum(IIf(nz([OTPUCK],"00000")="14281",1,0)) AS iOTPUCK_14281, Sum(IIf(nz([OTPUCK],"00000")="14282",1,0)) AS iOTPUCK_14282, PK47.ETKC, gruppa1(nz([kper],"0")) AS gr1, gruppa2(nz([kper],"0"),nz([uch],"00")) AS gr2, gruppa3(nz([ceh],"0")) AS gr3 INTO tblOsnov
+FROM (KADR01 INNER JOIN PK47 ON KADR01.PROF = PK47.PNN) LEFT JOIN PK02 ON KADR01.CEH = PK02.PNN
+WHERE (((KADR01.KD)="1"))
+GROUP BY IIf(KADR01.CEH='112',KADR01.CEH+'-'+KADR01.UCH,KADR01.CEH), PK02.NPNN, KADR01.KPER, KADR01.PROF, PK47.NPNN, PK47.ETKC, gruppa1(nz([kper],"0")), gruppa2(nz([kper],"0"),nz([uch],"00")), gruppa3(nz([ceh],"0"))
+HAVING (((KADR01.KPER)="1" Or (KADR01.KPER)="2" Or (KADR01.KPER)="7"))
+ORDER BY IIf(KADR01.CEH='112',KADR01.CEH+'-'+KADR01.UCH,KADR01.CEH), KADR01.KPER, KADR01.PROF;
