@@ -1,0 +1,45 @@
+Public Sub MoeMenu()
+Dim menubar As CommandBar
+Dim but As CommandBarButton
+
+  'Проверка на наличие меню
+  On Error GoTo er2
+  Application.CommandBars("DImenu").Delete
+  Resume Next
+er2:
+  'Установка меню
+  Set menubar = CommandBars.Add(Name:="DImenu", Position:=msoBarRight, menubar:=True)
+  With menubar
+    .Protection = msoBarNoMove
+    .Visible = True
+  End With
+  'Другие кнопки
+  Set but = Application.CommandBars("DImenu").Controls.Add(msoControlButton)
+  With but
+   .FaceId = 1
+   .BeginGroup = True
+   .Style = msoButtonCaption
+   .Caption = "      "
+   .ToolTipText = CStr(Format(Now(), "dddd, d mmm yyyy")) + " г."
+   .OnAction = "приветствие2"
+  End With
+  Set but = Application.CommandBars("DImenu").Controls.Add(msoControlButton)
+  With but
+   .FaceId = 1
+   .BeginGroup = True
+   .Style = msoButtonCaption
+   .Caption = " Выход в Windows "
+   .ToolTipText = "Выход в Windows"
+   .OnAction = "exit"
+  End With
+  Set but = Application.CommandBars("DImenu").Controls.Add(msoControlButton)
+  With but
+   .FaceId = 1
+   .BeginGroup = True
+   .Style = msoButtonCaption
+   .Caption = "      "
+   .ToolTipText = CStr(Format(Now(), "dddd, d mmm yyyy")) + " г."
+   .OnAction = "приветствие"
+  End With
+  
+End Sub
