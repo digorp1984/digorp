@@ -1,0 +1,81 @@
+Function itog2gr1(strdbf As String, kolpole As Integer)
+Const golgr = 13
+'Функция подсчёта итогов
+'strdbf - имя таблицы
+'kolpole - кол-во суммированных полей
+'golgr - кол-во групп в отчёте
+'tipCeh - тип цеха: 1=CEHD ... другие CEH
+
+Dim rst As Recordset
+Set rst = CurrentDb.OpenRecordset(strdbf)
+
+Dim itog(1 To golgr) As String
+Dim itog2(1 To 30, 1 To golgr) As Long, kontr As String
+Dim i As Integer
+
+itog(1) = "Пр-во №2"
+itog(2) = "Пр-во №12"
+itog(3) = "ОСН. ПР-ВО"
+itog(4) = "ИП"
+itog(5) = "ВСПОМ. (21-АТЦ)"
+itog(6) = "ЦЕХИ ВСП. ПР-ВА"
+itog(7) = "ПО ЦЕХАМ"
+itog(8) = "ПО ОТДЕЛАМ"
+itog(9) = "ПО ЗАВОДУ"
+itog(10) = "СОЦ. СФЕРА"
+itog(11) = "ВСЕГО"
+itog(12) = "ПРОЧИЕ"
+itog(13) = "ИТОГО"
+
+Do While Not rst.EOF
+  kontr = rst.Fields("gr2")
+  For i = 1 To kolpole
+    'Подсчёт итогов по первичным группам из функции Gruppa1
+    itog2(i, Val(kontr)) = itog2(i, Val(kontr)) + rst.Fields(i + 1)
+  Next i
+  rst.MoveNext
+Loop
+ 
+For i = 1 To kolpole
+  'Подсчёт общих итогов таких как - по заводу, всего ...
+  itog2(i, 3) = itog2(i, 1) + itog2(i, 2)
+  itog2(i, 6) = itog2(i, 4) + itog2(i, 5)
+  itog2(i, 7) = itog2(i, 3) + itog2(i, 6)
+  itog2(i, 9) = itog2(i, 7) + itog2(i, 8)
+  itog2(i, 11) = itog2(i, 9) + itog2(i, 10)
+  itog2(i, 13) = itog2(i, 11) + itog2(i, 12)
+Next i
+
+Dim j As Integer
+Dim lo As Boolean
+
+'Вывод итоговых сумм в массив
+For j = 1 To golgr
+  If j <> 2 Then 'Исключение 12 пр-ва
+   For i = 1 To kolpole
+      If itog2(i, j) <> 0 Then
+        lo = True
+        Exit For
+      End If
+    Next i
+    If lo Then
+      rst.AddNew
+      If tipCeh = 1 Or tipCeh = 2 Then
+        If tipCeh = 1 Then rst.Fields("CEHD") = "99900"
+        If tipCeh = 2 Then rst.Fields("CEHD") = "999000"
+      Else
+        rst.Fields("CEH") = "999"
+      End If
+      rst.Fields("pk02_NPNN") = itog(j)
+      rst.Fields("gr2") = Right("0" & Trim(CStr(j)), 2)
+      For i = 1 To kolpole
+        rst.Fields(i + 1) = itog2(i, j)
+      Next i
+      rst.Update
+    End If
+  End If
+Next j
+'Закрытие переменных
+rst.Close
+
+End Function
