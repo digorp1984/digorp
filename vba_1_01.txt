@@ -1,0 +1,182 @@
+Public Sub otch002()
+'Отчёт: Изготовление/ремонт оснастки бльше 20 тыс. и меньше 20 тыс.
+Dim vapoln As Boolean
+Dim mes, god As Integer
+Dim kol As Single
+  
+  vapoln = True
+  If IsNull(Forms("Ф_Печать").ctlFind2.Value) = True Then vapoln = False
+  If IsNull(Forms("Ф_Печать").ctlFind3.Value) = True Then vapoln = False
+  If vapoln = False Then
+    MsgBox "Вы забыли ввести значения поиска" + Chr(13) + _
+                  "             (Месяц/Год)", vbCritical, "Ошибка:"
+    Exit Sub
+  End If
+  '0) Подготовка
+  Call ClearTabl("Т_изг_по_груп(меняется)")
+  mes = CInt(Forms("Ф_Печать").ctlFind2.Value)
+  god = CInt(Forms("Ф_Печать").ctlFind3.Value)
+  vapoln = True
+  s = "SELECT Т_изделия_14.NAIM_OSN FROM Т_изделия_14"
+  s = s + " WHERE (((Month([SDANO]))=" + CStr(mes) + ") AND ((Year([SDANO]))=" + CStr(god) + "))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  If rst.EOF = True Then vapoln = False
+  rst.Close
+  s = "SELECT Т_услуги.NAIM_OSN FROM Т_услуги"
+  s = s + " WHERE (((Month([SDANO]))=" + CStr(mes) + ") AND ((Year([SDANO]))=" + CStr(god) + "))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  If vapoln = True And rst.EOF = True Then vapoln = False
+  If vapoln = False And rst.EOF = False Then vapoln = True
+  rst.Close
+  If vapoln = False Then
+    MsgBox "Значения по поиску отсутствуют", vbCritical, "Ошибка:"
+    Exit Sub
+  End If
+  Set rstSQL = CurrentDb.OpenRecordset("Т_изг_по_груп(меняется)")
+  '1) Копирование изготовления
+  s = "SELECT Т_изделия_14.NnaradZakaz, Т_изделия_14.NAIM_OSN, Т_изделия_14.OPISANIE, Т_изделия_14.KlasPoth, Т_изделия_14.N_DOC,"
+  s = s + " Т_изделия_14.N_CEHA, Т_изделия_14.KOL_SDANO, Т_изделия_14.WorkNch, Т_изделия_14.FAKT_STOIMOST, Т_изделия_14.METALL"
+  s = s + " FROM Т_изделия_14 WHERE (((Month([SDANO]))=" + CStr(mes) + ") AND ((Year([SDANO]))=" + CStr(god) + "))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Do Until rst.EOF = True
+      rstSQL.AddNew
+      rstSQL.Fields("NnaradZakaz") = Nz(rst.Fields("NnaradZakaz"), "000000")
+      rstSQL.Fields("NarIthd") = CInt(Right(Nz(rst.Fields("NnaradZakaz"), "000000"), 3))
+      rstSQL.Fields("NAIM_OSN") = Nz(rst.Fields("NAIM_OSN"), "")
+      rstSQL.Fields("OPISANIE") = Nz(rst.Fields("OPISANIE"), "")
+      rstSQL.Fields("KlasPoth") = Nz(rst.Fields("KlasPoth"), "")
+      rstSQL.Fields("N_DOC") = rst.Fields("N_DOC")
+      rstSQL.Fields("N_CEHA") = rst.Fields("N_CEHA")
+      kol = Nz(rst.Fields("KOL_SDANO"), 0)
+      rstSQL.Fields("KOL_SDANO") = kol
+      rstSQL.Fields("WorkNch1") = Nz(rst.Fields("WorkNch"), 0)
+      rstSQL.Fields("STOIMOST1") = Nz(rst.Fields("FAKT_STOIMOST"), 0)
+      rstSQL.Fields("WorkNch2") = Nz(rst.Fields("WorkNch"), 0) * Nz(rst.Fields("KOL_SDANO"), 0)
+      rstSQL.Fields("STOIMOST2") = Nz(rst.Fields("FAKT_STOIMOST"), 0) * Nz(rst.Fields("KOL_SDANO"), 0)
+      rstSQL.Fields("NN2") = 1
+      rstSQL.Fields("NameNN2") = "Изготовление"
+      If rst.Fields("FAKT_STOIMOST") >= 20000 Then
+        rstSQL.Fields("NN3") = 1
+        rstSQL.Fields("NameNN3") = "Свыше 20 тыс. руб"
+      Else
+        rstSQL.Fields("NN3") = 2
+        rstSQL.Fields("NameNN3") = "Меньше 20 тыс. руб"
+      End If
+      rstSQL.Fields("NN1") = 1
+      rstSQL.Fields("NameNN1") = "Спец"
+      rstSQL.Update
+      rst.MoveNext
+    Loop
+  End If
+  rst.Close
+  '2) Копирование ремонта
+  s = "SELECT Т_услуги.NnaradZakaz, Т_услуги.KlasPoth, Т_услуги.NAIM_OSN, Т_услуги.OPISANIE, Т_услуги.N_DOC,"
+  s = s + " Т_услуги.N_CEHA, Т_услуги.KOL_SDANO, Т_услуги.WorkNch, Т_услуги.STOIMOST, Т_услуги.material"
+  s = s + " FROM Т_услуги WHERE (((Month([SDANO]))=" + CStr(mes) + ") AND ((Year([SDANO]))=" + CStr(god) + ") AND ((Т_услуги.Vid)='Р'))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Do Until rst.EOF = True
+      rstSQL.AddNew
+      rstSQL.Fields("NnaradZakaz") = Nz(rst.Fields("NnaradZakaz"), "000000")
+      rstSQL.Fields("NarIthd") = CInt(Right(Nz(rst.Fields("NnaradZakaz"), "000000"), 3))
+      rstSQL.Fields("NAIM_OSN") = Nz(rst.Fields("NAIM_OSN"), "")
+      rstSQL.Fields("OPISANIE") = Nz(rst.Fields("OPISANIE"), "")
+      rstSQL.Fields("KlasPoth") = Nz(rst.Fields("KlasPoth"), "")
+      rstSQL.Fields("N_DOC") = rst.Fields("N_DOC")
+      rstSQL.Fields("N_CEHA") = rst.Fields("N_CEHA")
+      rstSQL.Fields("KOL_SDANO") = Nz(rst.Fields("KOL_SDANO"), 0)
+      kol = Nz(rst.Fields("KOL_SDANO"), 0)
+      If kol = 0 Then rstSQL.Fields("WorkNch1") = 0 Else rstSQL.Fields("WorkNch1") = Round(Nz(rst.Fields("WorkNch"), 0) / kol, 1)
+      If kol = 0 Then rstSQL.Fields("STOIMOST1") = 0 Else rstSQL.Fields("STOIMOST1") = Round(Nz(rst.Fields("STOIMOST"), 0) / kol, 1)
+      rstSQL.Fields("WorkNch2") = Nz(rst.Fields("WorkNch"), 0)
+      rstSQL.Fields("STOIMOST2") = Nz(rst.Fields("STOIMOST"), 0)
+      rstSQL.Fields("NN2") = 2
+      rstSQL.Fields("NameNN2") = "Ремонт"
+      If rst.Fields("STOIMOST") >= 20000 Then
+        rstSQL.Fields("NN3") = 1
+        rstSQL.Fields("NameNN3") = "Свыше 20 тыс. руб"
+      Else
+        rstSQL.Fields("NN3") = 2
+        rstSQL.Fields("NameNN3") = "Меньше 20 тыс. руб"
+      End If
+      rstSQL.Fields("NN1") = 1
+      rstSQL.Fields("NameNN1") = "Спец"
+      rstSQL.Update
+      rst.MoveNext
+    Loop
+  End If
+  rst.Close
+  '3) Копирование услуг
+  i = MsgBox("Вывести в отчёт услуги?", vbQuestion + vbYesNo, "Внимание:")
+  If i = 6 Then
+    s = "SELECT Т_услуги.NnaradZakaz, Т_услуги.KlasPoth, Т_услуги.NAIM_OSN, Т_услуги.OPISANIE, Т_услуги.N_DOC,"
+    s = s + " Т_услуги.N_CEHA, Т_услуги.KOL_SDANO, Т_услуги.WorkNch, Т_услуги.STOIMOST, Т_услуги.material"
+    s = s + " FROM Т_услуги WHERE (((Month([SDANO]))=" + CStr(mes) + ") AND ((Year([SDANO]))=" + CStr(god) + ") AND ((Т_услуги.Vid)='У'))"
+    Set rst = CurrentDb.OpenRecordset(s)
+    If rst.EOF = False Then
+      rst.MoveFirst
+      Do Until rst.EOF = True
+        rstSQL.AddNew
+        rstSQL.Fields("NnaradZakaz") = Nz(rst.Fields("NnaradZakaz"), "000000")
+        rstSQL.Fields("NarIthd") = CInt(Right(Nz(rst.Fields("NnaradZakaz"), "000000"), 3))
+        rstSQL.Fields("NAIM_OSN") = Nz(rst.Fields("NAIM_OSN"), "")
+        rstSQL.Fields("OPISANIE") = Nz(rst.Fields("OPISANIE"), "")
+        rstSQL.Fields("KlasPoth") = Nz(rst.Fields("KlasPoth"), "")
+        rstSQL.Fields("N_DOC") = rst.Fields("N_DOC")
+        rstSQL.Fields("N_CEHA") = rst.Fields("N_CEHA")
+        rstSQL.Fields("KOL_SDANO") = Nz(rst.Fields("KOL_SDANO"), 0)
+        If kol = 0 Then rstSQL.Fields("WorkNch1") = 0 Else rstSQL.Fields("WorkNch1") = Round(Nz(rst.Fields("WorkNch"), 0) / kol, 1)
+        If kol = 0 Then rstSQL.Fields("STOIMOST1") = 0 Else rstSQL.Fields("STOIMOST1") = Round(Nz(rst.Fields("STOIMOST"), 0) / kol, 1)
+        rstSQL.Fields("WorkNch2") = Nz(rst.Fields("WorkNch"), 0)
+        rstSQL.Fields("STOIMOST2") = Nz(rst.Fields("STOIMOST"), 0)
+        rstSQL.Fields("NN2") = 3
+        rstSQL.Fields("NameNN2") = "Услуги"
+        If rst.Fields("STOIMOST") >= 20000 Then
+          rstSQL.Fields("NN3") = 1
+          rstSQL.Fields("NameNN3") = "Свыше 20 тыс. руб"
+        Else
+          rstSQL.Fields("NN3") = 2
+          rstSQL.Fields("NameNN3") = "Меньше 20 тыс. руб"
+        End If
+        rstSQL.Fields("NN1") = 1
+        rstSQL.Fields("NameNN1") = "Спец"
+        rstSQL.Update
+        rst.MoveNext
+      Loop
+    End If
+    rst.Close
+    rstSQL.Close
+  End If
+  '4) Определение гражданки
+  s = "SELECT [Т_изг_по_груп(меняется)].NAIM_OSN, [Т_изг_по_груп(меняется)].OPISANIE, Т_Котлы.Kotel"
+  s = s + " FROM [Т_изг_по_груп(меняется)] LEFT JOIN Т_Котлы ON [Т_изг_по_груп(меняется)].NnaradZakaz = Т_Котлы.N_ITHD"
+  s = s + " WHERE (((Т_Котлы.Kotel)=12 Or (Т_Котлы.Kotel)=11 Or (Т_Котлы.Kotel)=22 Or (Т_Котлы.Kotel)=23))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Do Until rst.EOF = True
+      s = "SELECT [Т_изг_по_груп(меняется)].NN1, [Т_изг_по_груп(меняется)].NameNN1 FROM [Т_изг_по_груп(меняется)]"
+      s = s + " WHERE ((([Т_изг_по_груп(меняется)].NAIM_OSN)='" + rst.Fields("NAIM_OSN") + "') AND (([Т_изг_по_груп(меняется)].OPISANIE)='" + rst.Fields("OPISANIE") + "'))"
+      Set rs = CurrentDb.OpenRecordset(s)
+      If rs.EOF = False Then
+        rs.Edit
+        rs.Fields("NN1") = 2
+        rs.Fields("NameNN1") = "Гражданской"
+        rs.Update
+      End If
+      rs.Close
+      rst.MoveNext
+    Loop
+  End If
+  rst.Close
+  '4) Завершение
+  DoCmd.Close acForm, "Ф_Печать"
+  DoCmd.Close acForm, "Меню"
+  DoCmd.OpenReport "О_изг_по_груп", acPreview
+  DoCmd.Maximize
+  DoCmd.RunCommand acCmdZoom100
+
+End Sub
