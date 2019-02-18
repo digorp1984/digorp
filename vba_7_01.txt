@@ -1,0 +1,25 @@
+Private Sub raschet()
+'Расчёт данных для отчёта
+Dim kk As Integer
+
+ii = 1
+
+DoCmd.SetWarnings False
+DoCmd.OpenQuery "дата_отч"
+kk = Val(DLookup("MEC", "DATA_OTC11"))
+
+DoCmd.OpenQuery "UD_tek_priem"
+DoCmd.OpenQuery "UD_tek_uvl"
+DoCmd.OpenQuery "UD_nal_nach"
+DoCmd.OpenQuery "UD_nal_kon"
+
+While ii <= kk
+  Call d_otc
+  DoCmd.OpenQuery "tek_6"
+  DoCmd.OpenQuery "tek_6_1"
+  DoCmd.OpenQuery "tek_nach_6"
+  DoCmd.OpenQuery "tek_nach_6_1"
+  ii = ii + 1
+Wend
+
+End Sub
