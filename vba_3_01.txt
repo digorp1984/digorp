@@ -1,0 +1,59 @@
+Public Sub postroenie()
+Dim maxs, i2 As Integer
+Dim SDB, SDK, dob, t As String
+'Построение таблицы расцеховки
+
+  'Дополнительный расчёт, если нужно
+  'Правка если OBDK=Null то SDB=SIZD
+  'Call postroenieD
+  'Выделение ключевых позиций NS=0
+  'Подготовка расчёта
+  DoCmd.DeleteObject acTable, "R2_copy"
+  t = "R2A2"
+  s = "SELECT " + t + ".SDB, " + t + ".SDK, " + t + ".SIZD, " + t + ".PR, " + t + ".KOL, " + t + ".NS, " + t + ".IZD, " + t + ".DET, " + t + ".OBDB, " + t + ".OBDK,"
+  s = s + " " + t + ".TND, " + t + ".SCCB, " + t + ".SCCK, '' as name,"
+  Set rst = CurrentDb.OpenRecordset("SELECT Max(" + t + ".NS) AS [Max-NS] FROM " + t + "")
+  maxs = rst.Fields("Max-NS")
+  rst.Close
+  dob = ""
+  For i = 1 To maxs
+    dob = dob + " '' AS kod" + CStr(i) + ", '' as name" + CStr(i) + ","
+  Next i
+  s = s + dob + " 1 AS vid INTO R2_copy FROM " + t
+  CurrentDb.Execute (s)
+  dob = ""
+  For i = 1 To maxs
+    dob = dob + " R2_copy.kod" + CStr(i) + ", R2_copy.name" + CStr(i) + ","
+  Next i
+  'Расчёт кодов входимостей
+  For i = 1 To maxs
+    s = "SELECT R2_copy.SDB, R2_copy.SDK, R2_copy.NS," + dob + " R2_copy.tnd, R2_copy.name, R2_copy.OBDB"
+    s = s + " FROM R2_copy WHERE (((R2_copy.NS)=" + CStr(i) + "))"
+    Set rst = CurrentDb.OpenRecordset(s)
+    Do Until rst.EOF = True
+      SDB = Nz(rst.Fields("SDB"), "")
+      SDK = Nz(rst.Fields("SDK"), "")
+      rst.Edit
+      rst.Fields("kod" + CStr(i)) = SDB
+      rst.Fields("name" + CStr(i)) = Nz(rst.Fields("tnd"), "")
+      If i <> 1 Then
+        For i2 = i To 2 Step -1
+          s = "SELECT R2_copy.SDB, R2_copy.SDK, R2_copy.NS, R2_copy.tnd"
+          s = s + " FROM R2_copy WHERE (((R2_copy.SDB)='" + SDK + "') AND ((R2_copy.NS)=" + CStr(i2 - 1) + "))"
+          Set rs = CurrentDb.OpenRecordset(s)
+          SDB = Nz(rs.Fields("SDB"), "")
+          SDK = Nz(rs.Fields("SDK"), "")
+          rst.Fields("kod" + CStr(i2 - 1)) = SDB
+          rst.Fields("name" + CStr(i2 - 1)) = Nz(rs.Fields("tnd"), "")
+          rs.Close
+        Next i2
+      End If
+      rst.Fields("name") = String((CInt(rst.Fields("NS")) - 1) * 6, " ") + Nz(rst.Fields("tnd"), "") + "  -  " + Nz(rst.Fields("OBDB"), "")
+      rst.Update
+      rst.MoveNext
+    Loop
+    rst.Close
+  Next i
+  MsgBox "Основной расчёт закончен", vbExclamation, "Внимание"
+
+End Sub
