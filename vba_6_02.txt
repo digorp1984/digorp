@@ -1,0 +1,75 @@
+Public Sub ObnovlMas2(ByVal path3 As String, ByVal path2 As String)
+'Сетевое обновление массива
+Dim obj As DataClass
+Dim nameM As String
+Dim path1, path4 As String
+  
+  path1 = "D:\Acup\"
+  path4 = Left(path3, Len(path3) - 9)
+  MsgBox "Вставьте дискету с массивом " + path2, vbInformation, "Внимание:"
+  If DrvReady("a:\") = True Then
+    Set obj = New DataClass
+    i = obj.DeCompress_("D:\Acup\PKUNZIP.EXE", path2, "D:\Acup\")
+    If i <> 0 Then
+      s = "ошибка в процессе разархивирования"
+      If i = 1 Then s = "не найден файл архиватора " + "C:\Acup\PKUNZIP.EXE"
+      If i = 2 Then s = "не найден файл архива " + path2
+      If i = 3 Then s = "не существует каталог назначения"
+      MsgBox s, vbCritical, "Внимание:"
+    Else
+      nameM = LCase(Mid(path2, 4, Len(path2) - 7))
+      If nameM <> "pk" Then
+        'Обновление еденичных файлов
+        DoCmd.TransferDatabase acImport, "dBase IV", path1, acTable, nameM + ".dbf", nameM + "_copy", False
+        Set wrkJet = CreateWorkspace("NewJetWorkspace", "admin", "", dbUseJet)
+        Set dbs = wrkJet.OpenDatabase(path3)
+        dbs.TableDefs.Delete (nameM)
+        wrkJet.Close
+        Set dbs = Nothing
+        DoCmd.TransferDatabase acExport, "Microsoft Access", (path3), acTable, nameM + "_copy", nameM, False
+        DoCmd.DeleteObject acTable, nameM + "_copy"
+        s = "SELECT tblDat.dateObnov FROM tblDat WHERE (((tblDat.Massiv)='" + nameM + "'))"
+        Set rst = CurrentDb.OpenRecordset(s)
+        If rst.EOF = False Then
+          rst.Edit
+          rst.Fields("dateObnov") = FileDateTime(path1 + nameM + ".dbf")
+          rst.Update
+        End If
+        rst.Close
+        Kill (path4 + nameM + ".dbf")
+        FileCopy (path1 + nameM + ".dbf"), (path4 + nameM + ".dbf")
+        Kill (path1 + nameM + ".dbf")
+        MsgBox "Обновление " + nameM + " прошло успешно.", vbInformation, "Внимание:"
+        VaborVlag = True
+      Else
+        'Обновление группы файлов PK
+        s = "SELECT tblDat.dateObnov FROM tblDat WHERE (((tblDat.Massiv)='pk'))"
+        Set rst = CurrentDb.OpenRecordset(s)
+        If rst.EOF = False Then
+          rst.Edit
+          rst.Fields("dateObnov") = FileDateTime(path2)
+          rst.Update
+        End If
+        rst.Close
+        Set wrkJet = CreateWorkspace("NewJetWorkspace", "admin", "", dbUseJet)
+        Set dbs = wrkJet.OpenDatabase(path3)
+        Kill (path4 + "PK*.dbf")
+        For i = 21 To UBound(mas)
+          DoCmd.TransferDatabase acImport, "dBase IV", path1, acTable, mas(i) + ".dbf", mas(i) + "_copy", False
+          dbs.TableDefs.Delete (mas(i))
+          DoCmd.TransferDatabase acExport, "Microsoft Access", (path3), acTable, mas(i) + "_copy", mas(i), False
+          DoCmd.DeleteObject acTable, mas(i) + "_copy"
+          FileCopy (path1 + mas(i) + ".dbf"), (path4 + mas(i) + ".dbf")
+        Next i
+        wrkJet.Close
+        Set dbs = Nothing
+        Kill path1 + "PK*.dbf"
+        MsgBox "Обновление PK прошло успешно.", vbInformation, "Внимание:"
+        VaborVlag = True
+      End If
+    End If
+  Else
+    MsgBox "Дискета с массивом " + path2 + " отсутствует", vbCritical, "Ошибка:"
+  End If
+  
+End Sub
