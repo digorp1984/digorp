@@ -1,0 +1,62 @@
+Private Sub ButОбновить_Click()
+Dim bk As Boolean
+Dim polz As String
+'Обновление данных
+
+If prov = False Then
+  'Локальный вариант обновления
+  If Me.Flag1.Value = 0 And Me.Flag2.Value = 0 And Me.Flag3.Value = 0 And Me.Flag4.Value = 0 And Me.Flag5.Value = 0 And Me.Flag6.Value = 0 And Me.Flag7.Value = 0 And Me.Flag8.Value = 0 Then
+    MsgBox "Необходимо выбрать хотя бы одну позицию !", vbExclamation + vbOKOnly, "Проверка"
+  Else
+    If Me.Flag1.Value <> 0 Then Call ObnovlMas("c:\acup\dbf\", "a:\kadr01.zip")
+    If Me.Flag2.Value <> 0 Then Call ObnovlMas("c:\acup\dbf\", "a:\kaduvl.zip")
+    If Me.Flag3.Value <> 0 Then Call ObnovlMas("c:\acup\dbf\", "a:\pk.zip")
+    If Me.Flag4.Value <> 0 Then Call ObnovlMas("c:\acup\dbf\", "a:\kadfio.zip")
+    If Me.Flag5.Value <> 0 Then Call ObnovlMas("c:\acup\dbf\", "a:\invok.zip")
+    If Me.Flag6.Value <> 0 Then Call ObnovlMas("c:\acup\DBF_kid\", "a:\ovv.zip")
+    If Me.Flag7.Value <> 0 Then Call ObnovlMas("c:\acup\DBF\", "a:\inv_trud.zip")
+    If Me.Flag8.Value <> 0 Then Call ObnovlMas("c:\acup\DBF\", "a:\dekret.zip")
+    'Обновление дат массивов на экране
+    Call dts1
+  End If
+Else
+  'Сетевой вариант обновления (обновляется mdb и dbf)
+  If Me.Flag1.Value = 0 And Me.Flag2.Value = 0 And Me.Flag3.Value = 0 And Me.Flag4.Value = 0 And Me.Flag5.Value = 0 And Me.Flag6.Value = 0 And Me.Flag7.Value = 0 And Me.Flag8.Value = 0 Then
+    MsgBox "Необходимо выбрать хотя бы одну позицию !", vbExclamation + vbOKOnly, "Проверка"
+  Else
+    s = Nz(InputBox("Введите пароль", "Проверка", "********"), "")
+    If s <> "654321" Then
+      MsgBox "Нет доступа к обновлению", vbCritical, "Ошибка"
+    Else
+      'Проверка на наличие открытия базы перед обновлением
+      bk = FileExists("\\fcuit.uit.kmz.net\kadr01\Кадры.ldb")
+      If bk Then
+        polz = GetLdbContent("\\fcuit.uit.kmz.net\kadr01\Кадры.ldb")
+        If polz = "'none'" Or polz = "'error'" Then polz = "неопределены"
+        MsgBox "   База данных в данный момент открыта следующими пользователями: " + Chr(13) + _
+               polz + Chr(13) + Chr(13) + _
+               "Дождитесь пока базой данных перестанут пользоваться и обновите данные.", vbInformation, "Внимание"
+      Else
+        'Обновление данных
+        VaborVlag = False
+        If Me.Flag1.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\kadr01.zip")
+        If Me.Flag2.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\kaduvl.zip")
+        If Me.Flag3.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\pk.zip")
+        If Me.Flag4.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\kadfio.zip")
+        If Me.Flag5.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\invok.zip")
+        If Me.Flag6.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\ovv.zip")
+        If Me.Flag7.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\inv_trud.zip")
+        If Me.Flag8.Value <> 0 Then Call ObnovlMas2("\\fcuit.uit.kmz.net\kadr01\Кадры.mdb", "a:\dekret.zip")
+        If VaborVlag = True Then
+          'Дополнительные расчёты
+          Call obnovTblRab
+        End If
+        'Обновление дат массивов на экране
+        Call dts2
+      End If
+    End If
+  End If
+End If
+Me.Flag1.Value = 0: Me.Flag2.Value = 0: Me.Flag3.Value = 0: Me.Flag4.Value = 0: Me.Flag5.Value = 0: Me.Flag6.Value = 0: Me.Flag7.Value = 0: Me.Flag8.Value = 0
+
+End Sub
