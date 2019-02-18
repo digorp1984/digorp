@@ -1,0 +1,90 @@
+Private Sub Кнопка93_Click()
+Dim dob, ps1, ps2, ps3, poisk, param, namthap, namot, pp As String
+'Просмотр отчета
+  
+  'Формирование поиска
+  txtFindOtch = ""
+  NadoUch = True
+  ps1 = poisk1()
+  ps2 = poisk2()
+  ps3 = poisk3()
+  poisk = ""
+  If ps1 <> "" Then poisk = ps1
+  If ps2 <> "" Then
+    If poisk <> "" Then poisk = poisk + " AND "
+    poisk = poisk + ps2
+  End If
+  If ps3 <> "" Then
+    If poisk <> "" Then poisk = poisk + " AND "
+    poisk = poisk + ps3
+  End If
+  'Формирование структуры запроса на выборку
+  dob = CStr(VidData)
+  param = ""
+  namthap = "Неизвестно"
+  namot = "Неизвестно"
+  If Me.ctlObem.Value = 1 And Me.ctlDvig.Value = 1 Then
+    namthap = "с_движен_полн"
+    namot = "Отчёт полное движение"
+    param = "SELECT Т_изделия_" + dob + ".NAIM_OSN, Т_изделия_" + dob + ".N_DOC, Т_изделия_" + dob + ".N_CEHA, Т_изделия_" + dob + ".OPISANIE,"
+    param = param + " Т_изделия_" + dob + ".Texno, Т_изделия_" + dob + ".WorkNch, Т_изделия_" + dob + ".KOLVO, Т_изделия_" + dob + ".TB, Т_изделия_" + dob + ".SDANO, Т_изделия_" + dob + ".srok_sdachi,"
+    param = param + " Т_изделия_" + dob + ".NnaradZakaz, Т_изделия_" + dob + ".Prikaz, Т_изделия_" + dob + ".OTM, Т_изделия_" + dob + ".RaspOGK, Т_изделия_" + dob + ".PlanKach,"
+    If VidData = 15 Then s = "  '---' AS UCH0, '---' AS UCH7, Т_изделия_15.[1UCH] AS UCH1, Т_изделия_15.[2UCH] AS UCH2, '---' AS UCH4, '---' AS UCH5, '---' AS UCH6"
+    If VidData = 14 Then s = " Т_изделия_" + dob + ".METALL AS UCH0, Т_изделия_" + dob + ".FAKT_STOIMOST AS UCH7, Т_изделия_14.[1UCH] AS UCH1, Т_изделия_14.[2UCH] AS UCH2, Т_изделия_14.[4UCH] AS UCH4, Т_изделия_14.[5UCH] AS UCH5, '---' AS UCH6"
+    If VidData = 12 Then s = " Т_изделия_12.[0UCH] AS UCH0, Т_изделия_12.[7UCH] AS UCH7, Т_изделия_12.[1UCH] AS UCH1, Т_изделия_12.[2UCH] AS UCH2, '---' AS UCH4, Т_изделия_12.[5UCH] AS UCH5, Т_изделия_12.[6UCH] AS UCH6"
+    param = param + s + " FROM Т_изделия_" + dob
+  End If
+  If Me.ctlObem.Value = 1 And Me.ctlDvig.Value = 2 Then
+    namthap = "без_движ_полн"
+    namot = "Отчёт полный без движения"
+    param = "SELECT Т_изделия_" + dob + ".NAIM_OSN, Т_изделия_" + dob + ".N_DOC, Т_изделия_" + dob + ".N_CEHA, Т_изделия_" + dob + ".OPISANIE,"
+    param = param + " Т_изделия_" + dob + ".NATHVANIE, Т_изделия_" + dob + ".Texno, Т_изделия_" + dob + ".WorkNch, Т_изделия_" + dob + ".WorkGR, Т_изделия_" + dob + ".KOLVO,"
+    param = param + " Т_изделия_" + dob + ".TB, Т_изделия_" + dob + ".SDANO, Т_изделия_" + dob + ".KOL_SDANO, Т_изделия_" + dob + ".srok_sdachi, Т_изделия_" + dob + ".NnaradZakaz, Т_изделия_" + dob + ".Prikaz,"
+    param = param + " Т_изделия_" + dob + ".OTM, Т_изделия_" + dob + ".RaspOGK, Т_изделия_" + dob + ".PlanKach FROM Т_изделия_" + dob
+  End If
+  If Me.ctlObem.Value = 2 And Me.ctlDvig.Value = 2 Then
+    namthap = "без_движ_сжат"
+    namot = "Отчёт сжатый без движения"
+    param = "SELECT Т_изделия_" + dob + ".[NAIM_OSN], Т_изделия_" + dob + ".[OPISANIE],"
+    param = param + " Т_изделия_" + dob + ".[NATHVANIE], Т_изделия_" + dob + ".[Texno], Т_изделия_" + dob + ".[TB],"
+    param = param + " Т_изделия_" + dob + ".[N_DOC] , Т_изделия_" + dob + ".[KOLVO], Т_изделия_" + dob + ".[N_ITHD], Т_изделия_" + dob + ".[Prikaz], Т_изделия_" + dob + ".[OTM], Т_изделия_" + dob + ".[RaspOGK], Т_изделия_" + dob + ".[PlanKach],"
+    param = param + " Т_изделия_" + dob + ".[WorkNch], Т_изделия_" + dob + ".[srok_sdachi] FROM Т_изделия_" + dob
+  End If
+  If Me.ctlObem.Value = 3 Then
+    namthap = "общий_диспеч"
+    namot = "Обязательная номенклатура"
+    param = "SELECT Т_изделия_" + dob + ".NAIM_OSN, Т_изделия_" + dob + ".OPISANIE, Т_изделия_" + dob + ".NATHVANIE, Т_изделия_" + dob + ".Texno, Т_изделия_" + dob + ".TB,"
+    param = param + " Т_изделия_" + dob + ".KOLVO, Т_изделия_" + dob + ".Prikaz, Т_изделия_" + dob + ".OTM, Т_изделия_" + dob + ".RaspOGK, Т_изделия_" + dob + ".PlanKach, Т_изделия_" + dob + ".GPP FROM Т_изделия_" + dob + ""
+    param = param + " WHERE (((((Т_изделия_" + dob + ".Prikaz) Is Not Null)) OR (((Т_изделия_" + dob + ".OTM) Is Not Null)) OR (((Т_изделия_" + dob + ".RaspOGK) Is Not Null))"
+    param = param + " OR (((Т_изделия_" + dob + ".PlanKach) Is Not Null)) OR (((Т_изделия_" + dob + ".GPP)='Да')))"
+    If poisk <> "" Then pp = param + " AND " + poisk + ")" Else pp = param + ")"
+    Set rst = CurrentDb.OpenRecordset(pp)
+  Else
+    If poisk <> "" Then pp = param + " WHERE (" + poisk + ")" Else pp = param
+    Set rst = CurrentDb.OpenRecordset(pp)
+  End If
+  If rst.EOF = True Then
+    MsgBox "Данные по поиску отсутствуют", vbCritical, "Ошибка:"
+    rst.Close
+    Exit Sub
+  End If
+  rst.Close
+  DoCmd.DeleteObject acQuery, "З_" + namthap
+  Set qwr = CurrentDb.CreateQueryDef("З_" + namthap, pp)
+  qwr.Close
+  CurrentDb.QueryDefs.Refresh
+  'Формирование шапки
+  Set rst = CurrentDb.OpenRecordset("addition")
+  rst.MoveFirst
+  rst.Edit
+  rst.Fields("Thagolovok") = namot + " по " + CStr(VidData) + " цеху"
+  rst.Fields("txtPoisk") = "(Поиск:" + txtFindOtch + ")"
+  rst.Update
+  rst.Close
+  'Открытие отчёта
+  DoCmd.OpenReport "О_" + namthap, acPreview
+  DoCmd.Close acForm, "Ф_Печать_номенкл"
+  DoCmd.Maximize
+  DoCmd.RunCommand acCmdZoom100
+
+End Sub
