@@ -1,0 +1,38 @@
+Sub restore()
+
+  i = 0
+  Set rst = CurrentDb.OpenRecordset("Т_услуги")
+  rst.MoveFirst
+  Do Until rst.EOF = True
+    s = ""
+    If IsNull(rst.Fields("NAIM_OSN")) = False Then
+      If s <> "" Then s = s + " and "
+      s = s + "((Т_Ремонт.NAIM_OSN)='" + rst.Fields("NAIM_OSN") + "')"
+    End If
+    If IsNull(rst.Fields("OPISANIE")) = False Then
+      If s <> "" Then s = s + " and "
+      s = s + "((Т_Ремонт.OPISANIE)='" + rst.Fields("OPISANIE") + "')"
+    End If
+    If IsNull(rst.Fields("N_DOC")) = False Then
+      If s <> "" Then s = s + " and "
+      s = s + "((Т_Ремонт.N_DOC)=" + rst.Fields("N_DOC") + ")"
+    End If
+    If s <> "" Then
+      s = "SELECT Т_Ремонт.MANI, Т_Ремонт.MATERIAL, Т_Ремонт.BIGMANI FROM Т_Ремонт WHERE (" + s + ")"
+      Set rs = CurrentDb.OpenRecordset(s)
+      If rs.EOF = False Then
+        rst.Edit
+        If rs.Fields("MANI") <> 0 Then rst.Fields("Tharpl") = rs.Fields("MANI")
+        If rs.Fields("MATERIAL") <> 0 Then rst.Fields("material") = rs.Fields("MATERIAL")
+        If rs.Fields("BIGMANI") <> 0 Then rst.Fields("STOIMOST") = rs.Fields("BIGMANI")
+        rst.Update
+      End If
+      rs.Close
+    End If
+    i = i + 1
+    rst.MoveNext
+  Loop
+  rst.Close
+  MsgBox "Выполнено", vbInformation, "Справка:"
+
+End Sub
