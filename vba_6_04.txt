@@ -1,0 +1,28 @@
+Public Function pencioner2(ByVal POL As String, ByVal dr As String, ByVal VP As String, ByVal ns As String) As String
+Dim dob, dob2 As Integer
+Dim d As String
+Dim dtek, drab As Date
+'Расчёт даты выхода на пенсию
+
+pencioner2 = "по_возр."
+dob = 0
+If POL = "1" Then
+  dob = 60
+Else
+  dob = 55
+End If
+dob2 = dob
+Select Case ns
+  Case 1
+    dob2 = dob2 - 10
+    pencioner2 = "льгот.I "
+  Case 2
+    pencioner2 = "льгот.II "
+    dob2 = dob2 - 5
+End Select
+dtek = DATE
+If Mid(dr, 1, 4) = "2902" Then d = "28.02" Else d = Mid(dr, 1, 2) + "." + Mid(dr, 3, 2)
+drab = CDate(d + "." + CStr(CInt(Mid(dr, 5, 4)) + dob2))
+If drab < dtek And VP <> "2" And VP <> "7" Then pencioner2 = "по_возр."
+
+End Function
