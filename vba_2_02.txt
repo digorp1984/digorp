@@ -1,0 +1,89 @@
+Private Sub Кнопка105_Click()
+Dim s1, s2 As String
+Dim nom1, nom2, nom3 As Long
+Dim rst2 As Recordset
+Dim rst3 As Recordset
+'Дублирование ДН
+
+  If Nz(Me.ctlFind.Value, "") <> "" Then
+    s1 = CStr(Me.ctlFind.Column(0))
+    s = CStr(Me.ctlFind.Column(1))
+    s2 = Nz(InputBox("Введите новое обозначение (ДН)," + Chr(13) + Chr(13) + "старое значение: " + s1, "УИТ", ""), "")
+    If s2 = "" Then s2 = s1 + "_2"
+    'Добавление в tblDn
+    Set rst2 = CurrentDb.OpenRecordset("tblDn")
+    sql = "SELECT tblDn.* FROM tblDn WHERE (((tblDn.idDN)=" + s + "))"
+    Set rst = CurrentDb.OpenRecordset(sql)
+    rst2.AddNew
+    rst2.Fields("DN").Value = s2
+    rst2.Fields("texno").Value = Nz(rst.Fields("texno").Value, "-")
+    rst2.Fields("NameInstr").Value = Nz(rst.Fields("NameInstr").Value, "-")
+    nom1 = rst2.Fields("idDN").Value 'Новый idDN
+    rst2.Update
+    rst.Close
+    rst2.Close
+    'Добавление в tblSost + tblMater + tblOper
+    sql = "SELECT tblSost.* FROM tblSost WHERE (((tblSost.idDN)=" + s + "))"
+    Set rst = CurrentDb.OpenRecordset(sql)
+    If rst.EOF = False Then
+      Do Until rst.EOF = True
+        'Копирование tblSost
+        Set rst2 = CurrentDb.OpenRecordset("tblSost")
+        rst2.AddNew
+        rst2.Fields("idDN").Value = nom1
+        rst2.Fields("nom").Value = Nz(rst.Fields("nom").Value, 0)
+        rst2.Fields("name").Value = Nz(rst.Fields("name").Value, "-")
+        rst2.Fields("grupa").Value = Nz(rst.Fields("grupa").Value, "1")
+        rst2.Fields("kopl").Value = Nz(rst.Fields("kopl").Value, 0)
+        rst2.Fields("idRaszen").Value = Nz(rst.Fields("idRaszen").Value, 0)
+        nom2 = rst2.Fields("idSost").Value 'Новый idSost
+        nom3 = rst.Fields("idSost").Value 'Старый idSost
+        rst2.Update
+        rst2.Close
+        'Копирование tblMater
+        sql = "SELECT tblMater.* FROM tblMater WHERE (((tblMater.idSost)=" + CStr(nom3) + "))"
+        Set rst2 = CurrentDb.OpenRecordset(sql)
+        Set rst3 = CurrentDb.OpenRecordset("tblMater")
+        If rst2.EOF = False Then
+          Do Until rst2.EOF = True
+            rst3.AddNew
+            rst3.Fields("idSost").Value = nom2
+            rst3.Fields("idMat").Value = rst2.Fields("idMat").Value
+            rst3.Fields("razmer").Value = Nz(rst2.Fields("razmer").Value, "кг")
+            rst3.Fields("ves").Value = Nz(rst2.Fields("ves").Value, 0)
+            rst3.Update
+            rst2.MoveNext
+          Loop
+        End If
+        rst3.Close
+        rst2.Close
+        'Копирование tblOper
+        sql = "SELECT tblOper.* FROM tblOper WHERE (((tblOper.idSost)=" + CStr(nom3) + "))"
+        Set rst2 = CurrentDb.OpenRecordset(sql)
+        Set rst3 = CurrentDb.OpenRecordset("tblOper")
+        If rst2.EOF = False Then
+          Do Until rst2.EOF = True
+            rst3.AddNew
+            rst3.Fields("idSost").Value = nom2
+            rst3.Fields("nom").Value = Nz(rst2.Fields("nom").Value, 1)
+            rst3.Fields("name").Value = Nz(rst2.Fields("name").Value, "-")
+            rst3.Fields("vremmin").Value = Nz(rst2.Fields("vremmin").Value, 0)
+            rst3.Update
+            rst2.MoveNext
+          Loop
+        End If
+        rst3.Close
+        rst2.Close
+        rst.MoveNext
+      Loop
+    End If
+    rst.Close
+    MsgBox "ДН был удачно скопирован", vbInformation, "Сообщение:"
+    Me.ctlFind.Requery
+    Me.ctlFind.Value = s2
+    Call ctlFind_AfterUpdate
+  Else
+    MsgBox "Необходимо выбрать ДН", vbCritical, "Ошибка:"
+  End If
+
+End Sub
