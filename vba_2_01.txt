@@ -1,0 +1,43 @@
+Private Sub raschetDN()
+Dim cen, mater, tharp, cehr, sebest As Single
+Dim mater2, tharp2, sebest2 As Single
+Dim compl As Integer
+'Расчёт себестоимости и отпускной цены по инструменту
+
+  mater = 0: tharp = 0: cehr = 0: sebest = 0
+  If Nz(Me.ctlFind.Value, "") <> "" Then
+    s = CStr(Me.ctlFind.Column(1))
+    sql = "SELECT tblSost.idSost, tblSost.kopl, tblSprRaszen.cena "
+    sql = sql + "FROM tblSprRaszen RIGHT JOIN tblSost ON tblSprRaszen.idRaszen = tblSost.idRaszen WHERE (((tblSost.idDN)=" + s + "))"
+    Set rstSQL = CurrentDb.OpenRecordset(sql)
+    Do Until rstSQL.EOF = True
+      idSost = rstSQL.Fields("idSost").Value
+      sql = "SELECT Sum(Round([ves]*[cena],2)) AS itog FROM tblSprMater"
+      sql = sql + " RIGHT JOIN tblMater ON tblSprMater.idMat = tblMater.idMat"
+      sql = sql + " WHERE (((tblMater.idSost)=" + CStr(idSost) + "))"
+      Set rst = CurrentDb.OpenRecordset(sql)
+      If rst.EOF = False Then mater2 = Nz(rst.Fields("itog").Value, 0) Else mater2 = 0
+      rst.Close
+      sql = "SELECT Sum(Round([vremmin]/60,2)) AS itog FROM tblOper"
+      sql = sql + " WHERE ((tblOper.idSost)=" + CStr(idSost) + ")"
+      Set rst = CurrentDb.OpenRecordset(sql)
+      If rst.EOF = False Then sebest2 = Nz(rst.Fields("itog").Value, 0) Else sebest2 = 0
+      rst.Close
+      compl = Nz(rstSQL.Fields("kopl").Value, 0)
+      tharp2 = Round(Nz(rstSQL.Fields("cena").Value, 0) * sebest2, 2)
+      mater = mater + (mater2 * compl)
+      tharp = tharp + (tharp2 * compl)
+      sebest = sebest + (sebest2 * compl)
+      rstSQL.MoveNext
+    Loop
+    rstSQL.Close
+  End If
+  cehr = Round(tharp * (DLookup("cehrash", "addition") / 100), 2)
+  cen = mater + tharp + cehr
+  Me.ctlcen.Value = cen
+  Me.ctlcen1.Value = mater
+  Me.ctlcen2.Value = tharp
+  Me.ctlcen3.Value = cehr
+  Me.ctlsebest.Value = sebest
+
+End Sub
