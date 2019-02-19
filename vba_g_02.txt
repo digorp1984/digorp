@@ -1,0 +1,48 @@
+Sub PostrNom()
+Dim nt, nr, i, nom1, nom2, k, j As Integer
+Dim txt, dob As String
+'Построение списка с учётом удаления строк и пересчёта номера
+  
+  ActiveDocument.Unprotect ("")
+  '-----------------------------------
+  nt = ActiveDocument.Tables.Count - 1
+  nr = ActiveDocument.Tables(nt).Rows.Count
+  nom1 = 0: nom2 = 0
+  For i = 1 To nr
+    txt = CStr(ActiveDocument.Tables(nt).Cell(i, 2).Range.Text)
+    k = CInt(Left(txt, Len(txt) - 1))
+    If k = 1 Or k = 2 Then
+      If k = 2 Then
+        nom1 = nom1 + 1
+        dob = "I"
+        If nom1 = 2 Then dob = "II"
+        If nom1 = 3 Then dob = "III"
+        If nom1 = 4 Then dob = "IV"
+        If nom1 = 5 Then dob = "V"
+        If nom1 = 6 Then dob = "VI"
+        If nom1 = 7 Then dob = "VII"
+        If nom1 = 8 Then dob = "VIII"
+        If nom1 = 9 Then dob = "IX"
+        If nom1 = 10 Then dob = "X"
+      Else
+        nom2 = nom2 + 1
+        dob = CStr(nom2)
+      End If
+      txt = CStr(ActiveDocument.Tables(nt).Cell(i, 4).Range.Text)
+      txt = Left(txt, Len(txt) - 2)
+      j = InStr(1, txt, ".")
+      txt = dob + ". " + Right(txt, Len(txt) - j - 1)
+      ActiveDocument.Tables(nt).Cell(i, 4).Range.Text = txt
+    End If
+  Next i
+  If nom1 = 1 Then
+    ActiveDocument.Tables(nt).Range.Rows(1).Select
+    Selection.Rows.Delete
+  End If
+  ActiveDocument.Tables(nt).Columns(3).Select
+  Selection.Font.Hidden = True
+  '-----------------------------------
+  ActiveDocument.Protect Password:="", NoReset:=True, Type:=wdAllowOnlyFormFields
+  MsgBox "Операция расчёта завершена", vbExclamation, "Внимание:"
+
+End Sub
