@@ -1,0 +1,112 @@
+Public Sub otch002()
+Dim delen1, delen2, dopoln As Integer
+Dim ob1, ob2, ob3, ob4, ob5, ob6, ob7, ob8, ob9, ob10 As Single
+'Отчёт: Объём производства и реализации на **** год (полная форма)
+  
+  '1) Подготовка к работе с таблицей
+  Call OpredelParam
+  Call ClearTabl("Т_переменная")
+  sum1 = 0: sum2 = 0: sum3 = 0: sum4 = 0: sum5 = 0
+  sum6 = 0: sum7 = 0: sum8 = 0: sum9 = 0: sum10 = 0
+  sumU1 = 0: sumU2 = 0: sumU3 = 0: sumU4 = 0: sumU5 = 0
+  sumU6 = 0: sumU7 = 0: sumU8 = 0: sumU9 = 0: sumU10 = 0: sumU11 = 0: sumU12 = 0: sumU13 = 0: sumU14 = 0: sumU15 = 0
+  If thena1 = "Work" Then delen1 = 1 Else delen1 = 1000
+  If thena2 = "Work" Then delen2 = 1 Else delen2 = 1000
+  '2) Расчет и копирование данных
+  Set rs = CurrentDb.OpenRecordset("Т_переменная")
+  Set rst = CurrentDb.OpenRecordset("З_весь_год")
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Do While rst.EOF = False
+      If rst.Fields("Uch") = 99 Then
+        sum1 = Round(rst.Fields(kolichvo1 + "_01") * rst.Fields(thena1 + "_01") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_02") * rst.Fields(thena1 + "_02") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_03") * rst.Fields(thena1 + "_03") / delen1, 1)
+        sum2 = Round(rst.Fields(kolichvo1 + "_04") * rst.Fields(thena1 + "_04") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_05") * rst.Fields(thena1 + "_05") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_06") * rst.Fields(thena1 + "_06") / delen1, 1)
+        sum3 = Round(rst.Fields(kolichvo1 + "_07") * rst.Fields(thena1 + "_07") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_08") * rst.Fields(thena1 + "_08") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_09") * rst.Fields(thena1 + "_09") / delen1, 1)
+        sum4 = Round(rst.Fields(kolichvo1 + "_10") * rst.Fields(thena1 + "_10") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_11") * rst.Fields(thena1 + "_11") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_12") * rst.Fields(thena1 + "_12") / delen1, 1)
+        sum5 = sum1 + sum2 + sum3 + sum4
+        sum6 = Round(rst.Fields(kolichvo2 + "_01") * rst.Fields(thena2 + "_01") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_02") * rst.Fields(thena2 + "_02") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_03") * rst.Fields(thena2 + "_03") / delen2, 1)
+        sum7 = Round(rst.Fields(kolichvo2 + "_04") * rst.Fields(thena2 + "_04") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_05") * rst.Fields(thena2 + "_05") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_06") * rst.Fields(thena2 + "_06") / delen2, 1)
+        sum8 = Round(rst.Fields(kolichvo2 + "_07") * rst.Fields(thena2 + "_07") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_08") * rst.Fields(thena2 + "_08") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_09") * rst.Fields(thena2 + "_09") / delen2, 1)
+        sum9 = Round(rst.Fields(kolichvo2 + "_10") * rst.Fields(thena2 + "_10") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_11") * rst.Fields(thena2 + "_11") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_12") * rst.Fields(thena2 + "_12") / delen2, 1)
+        sum10 = sum6 + sum7 + sum8 + sum9
+      End If
+      If rst.Fields("Uch") = 100 Then
+        sumU1 = Round(rst.Fields(kolichvo1 + "_01") * rst.Fields(thena1 + "_01") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_02") * rst.Fields(thena1 + "_02") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_03") * rst.Fields(thena1 + "_03") / delen1, 1)
+        sumU2 = Round(rst.Fields(kolichvo1 + "_04") * rst.Fields(thena1 + "_04") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_05") * rst.Fields(thena1 + "_05") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_06") * rst.Fields(thena1 + "_06") / delen1, 1)
+        sumU3 = Round(rst.Fields(kolichvo1 + "_07") * rst.Fields(thena1 + "_07") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_08") * rst.Fields(thena1 + "_08") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_09") * rst.Fields(thena1 + "_09") / delen1, 1)
+        sumU4 = Round(rst.Fields(kolichvo1 + "_10") * rst.Fields(thena1 + "_10") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_11") * rst.Fields(thena1 + "_11") / delen1, 1) + Round(rst.Fields(kolichvo1 + "_12") * rst.Fields(thena1 + "_12") / delen1, 1)
+        sumU5 = sumU1 + sumU2 + sumU3 + sumU4
+        sumU6 = Round(rst.Fields(kolichvo2 + "_01") * rst.Fields(thena2 + "_01") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_02") * rst.Fields(thena2 + "_02") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_03") * rst.Fields(thena2 + "_03") / delen2, 1)
+        sumU7 = Round(rst.Fields(kolichvo2 + "_04") * rst.Fields(thena2 + "_04") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_05") * rst.Fields(thena2 + "_05") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_06") * rst.Fields(thena2 + "_06") / delen2, 1)
+        sumU8 = Round(rst.Fields(kolichvo2 + "_07") * rst.Fields(thena2 + "_07") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_08") * rst.Fields(thena2 + "_08") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_09") * rst.Fields(thena2 + "_09") / delen2, 1)
+        sumU9 = Round(rst.Fields(kolichvo2 + "_10") * rst.Fields(thena2 + "_10") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_11") * rst.Fields(thena2 + "_11") / delen2, 1) + Round(rst.Fields(kolichvo2 + "_12") * rst.Fields(thena2 + "_12") / delen2, 1)
+        sumU10 = sumU6 + sumU7 + sumU8 + sumU9
+      End If
+      If rst.Fields("Uch") <> 99 And rst.Fields("Uch") <> 100 Then
+        If rst.Fields("Edizm") = 2 Then dopoln = 0 Else dopoln = 1
+        rs.AddNew
+        rs.Fields("kolvo1") = (rst.Fields(kolichvo1 + "_01") + rst.Fields(kolichvo1 + "_02") + rst.Fields(kolichvo1 + "_03")) * dopoln
+        rs.Fields("kolvo2") = (rst.Fields(kolichvo1 + "_04") + rst.Fields(kolichvo1 + "_05") + rst.Fields(kolichvo1 + "_06")) * dopoln
+        rs.Fields("kolvo3") = (rst.Fields(kolichvo1 + "_07") + rst.Fields(kolichvo1 + "_08") + rst.Fields(kolichvo1 + "_09")) * dopoln
+        rs.Fields("kolvo4") = (rst.Fields(kolichvo1 + "_10") + rst.Fields(kolichvo1 + "_11") + rst.Fields(kolichvo1 + "_12")) * dopoln
+        rs.Fields("kolvo5") = rs.Fields("kolvo1") + rs.Fields("kolvo2") + rs.Fields("kolvo3") + rs.Fields("kolvo4")
+        rs.Fields("kolvo6") = (rst.Fields(kolichvo2 + "_01") + rst.Fields(kolichvo2 + "_02") + rst.Fields(kolichvo2 + "_03")) * dopoln
+        rs.Fields("kolvo7") = (rst.Fields(kolichvo2 + "_04") + rst.Fields(kolichvo2 + "_05") + rst.Fields(kolichvo2 + "_06")) * dopoln
+        rs.Fields("kolvo8") = (rst.Fields(kolichvo2 + "_07") + rst.Fields(kolichvo2 + "_08") + rst.Fields(kolichvo2 + "_09")) * dopoln
+        rs.Fields("kolvo9") = (rst.Fields(kolichvo2 + "_10") + rst.Fields(kolichvo2 + "_11") + rst.Fields(kolichvo2 + "_12")) * dopoln
+        rs.Fields("kolvo10") = rs.Fields("kolvo6") + rs.Fields("kolvo7") + rs.Fields("kolvo8") + rs.Fields("kolvo9")
+        ob1 = rst.Fields(kolichvo1 + "_01") * rst.Fields(thena1 + "_01") + rst.Fields(kolichvo1 + "_02") * rst.Fields(thena1 + "_02") + rst.Fields(kolichvo1 + "_03") * rst.Fields(thena1 + "_03")
+        ob2 = rst.Fields(kolichvo1 + "_04") * rst.Fields(thena1 + "_04") + rst.Fields(kolichvo1 + "_05") * rst.Fields(thena1 + "_05") + rst.Fields(kolichvo1 + "_06") * rst.Fields(thena1 + "_06")
+        ob3 = rst.Fields(kolichvo1 + "_07") * rst.Fields(thena1 + "_07") + rst.Fields(kolichvo1 + "_08") * rst.Fields(thena1 + "_08") + rst.Fields(kolichvo1 + "_09") * rst.Fields(thena1 + "_09")
+        ob4 = rst.Fields(kolichvo1 + "_10") * rst.Fields(thena1 + "_10") + rst.Fields(kolichvo1 + "_11") * rst.Fields(thena1 + "_11") + rst.Fields(kolichvo1 + "_12") * rst.Fields(thena1 + "_12")
+        ob5 = ob1 + ob2 + ob3 + ob4
+        ob6 = rst.Fields(kolichvo2 + "_01") * rst.Fields(thena2 + "_01") + rst.Fields(kolichvo2 + "_02") * rst.Fields(thena2 + "_02") + rst.Fields(kolichvo2 + "_03") * rst.Fields(thena2 + "_03")
+        ob7 = rst.Fields(kolichvo2 + "_04") * rst.Fields(thena2 + "_04") + rst.Fields(kolichvo2 + "_05") * rst.Fields(thena2 + "_05") + rst.Fields(kolichvo2 + "_06") * rst.Fields(thena2 + "_06")
+        ob8 = rst.Fields(kolichvo2 + "_07") * rst.Fields(thena2 + "_07") + rst.Fields(kolichvo2 + "_08") * rst.Fields(thena2 + "_08") + rst.Fields(kolichvo2 + "_09") * rst.Fields(thena2 + "_09")
+        ob9 = rst.Fields(kolichvo2 + "_10") * rst.Fields(thena2 + "_10") + rst.Fields(kolichvo2 + "_11") * rst.Fields(thena2 + "_11") + rst.Fields(kolichvo2 + "_12") * rst.Fields(thena2 + "_12")
+        ob10 = ob6 + ob7 + ob8 + ob9
+        rs.Fields("obem1") = Round(ob1 / delen1, 1)
+        rs.Fields("obem2") = Round(ob2 / delen1, 1)
+        rs.Fields("obem3") = Round(ob3 / delen1, 1)
+        rs.Fields("obem4") = Round(ob4 / delen1, 1)
+        rs.Fields("obem5") = Round(ob5 / delen1, 1)
+        rs.Fields("obem6") = Round(ob6 / delen2, 1)
+        rs.Fields("obem7") = Round(ob7 / delen2, 1)
+        rs.Fields("obem8") = Round(ob8 / delen2, 1)
+        rs.Fields("obem9") = Round(ob9 / delen2, 1)
+        rs.Fields("obem10") = Round(ob10 / delen2, 1)
+        If rs.Fields("kolvo1") = 0 Or dopoln = 0 Then rs.Fields("zena1") = 0 Else rs.Fields("zena1") = Round((ob1 / rs.Fields("kolvo1")), 2)
+        If rs.Fields("kolvo2") = 0 Or dopoln = 0 Then rs.Fields("zena2") = 0 Else rs.Fields("zena2") = Round((ob2 / rs.Fields("kolvo2")), 2)
+        If rs.Fields("kolvo3") = 0 Or dopoln = 0 Then rs.Fields("zena3") = 0 Else rs.Fields("zena3") = Round((ob3 / rs.Fields("kolvo3")), 2)
+        If rs.Fields("kolvo4") = 0 Or dopoln = 0 Then rs.Fields("zena4") = 0 Else rs.Fields("zena4") = Round((ob4 / rs.Fields("kolvo4")), 2)
+        If rs.Fields("kolvo5") = 0 Or dopoln = 0 Then rs.Fields("zena5") = 0 Else rs.Fields("zena5") = Round((ob5 / rs.Fields("kolvo5")), 2)
+        If rs.Fields("kolvo6") = 0 Or dopoln = 0 Then rs.Fields("zena6") = 0 Else rs.Fields("zena6") = Round((ob6 / rs.Fields("kolvo6")), 2)
+        If rs.Fields("kolvo7") = 0 Or dopoln = 0 Then rs.Fields("zena7") = 0 Else rs.Fields("zena7") = Round((ob7 / rs.Fields("kolvo7")), 2)
+        If rs.Fields("kolvo8") = 0 Or dopoln = 0 Then rs.Fields("zena8") = 0 Else rs.Fields("zena8") = Round((ob8 / rs.Fields("kolvo8")), 2)
+        If rs.Fields("kolvo9") = 0 Or dopoln = 0 Then rs.Fields("zena9") = 0 Else rs.Fields("zena9") = Round((ob9 / rs.Fields("kolvo9")), 2)
+        If rs.Fields("kolvo10") = 0 Or dopoln = 0 Then rs.Fields("zena10") = 0 Else rs.Fields("zena10") = Round((ob10 / rs.Fields("kolvo10")), 2)
+        rs.Fields("Naim") = rst.Fields("Naim")
+        rs.Fields("Zakaz") = rst.Fields("Zakaz")
+        rs.Fields("Nom_dog") = rst.Fields("Nom_dog")
+        rs.Fields("Kod_OKP") = rst.Fields("Kod_OKP")
+        rs.Fields("Primechanie") = rst.Fields("Primechanie")
+        rs.Update
+      End If
+      rst.MoveNext
+    Loop
+  End If
+  rs.Close
+  rst.Close
+  '3) Завершение работы
+  Set rst = CurrentDb.OpenRecordset("Т_переменная")
+  If rst.EOF = True Then
+    DoCmd.OpenForm "Меню"
+    MsgBox "Данные отсутствуют", vbCritical, "Ошибка:"
+    rst.Close
+    Exit Sub
+  End If
+  rst.Close
+  Call ProvObem
+  DoCmd.OpenForm "Ф_настройка_печати_2"
+  
+End Sub
