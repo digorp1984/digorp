@@ -1,0 +1,57 @@
+Public Sub otch004()
+Dim dopoln As Integer
+Dim kol1, ob1 As Single
+'Отчёт: Объем производства продукции ОАО "КМЗ" (для заказчиков)
+
+  '1) Подготовка к работе с таблицей
+  Call OpredelParam
+  Call ClearTabl("Т_переменная")
+  If kolichvo1 = "Proizvod_Plan" Or kolichvo1 = "Prod_Plan" Then
+    kolichvo1 = "Proizvod_Plan"
+    thena1 = "Zena_deist"
+  Else
+    kolichvo1 = "Proizvod_Fakt"
+    thena1 = "Zena_deist"
+  End If
+  '2) Расчет и копирование данных
+  Set rs = CurrentDb.OpenRecordset("Т_переменная")
+  Set rst = CurrentDb.OpenRecordset("З_весь_год")
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Do While rst.EOF = False
+      If rst.Fields("Uch") <> 99 And rst.Fields("Uch") <> 100 Then
+        rs.AddNew
+        If rst.Fields("Edizm") = 2 Then dopoln = 0 Else dopoln = 1
+        kol1 = (rst.Fields(kolichvo1 + "_01") + rst.Fields(kolichvo1 + "_02") + rst.Fields(kolichvo1 + "_03") + rst.Fields(kolichvo1 + "_04") + rst.Fields(kolichvo1 + "_05") + rst.Fields(kolichvo1 + "_06") + rst.Fields(kolichvo1 + "_07") + _
+        rst.Fields(kolichvo1 + "_08") + rst.Fields(kolichvo1 + "_09") + rst.Fields(kolichvo1 + "_10") + rst.Fields(kolichvo1 + "_11") + rst.Fields(kolichvo1 + "_12")) * dopoln
+        rs.Fields("kolvo1") = kol1
+        ob1 = rst.Fields(kolichvo1 + "_01") * rst.Fields(thena1 + "_01") + rst.Fields(kolichvo1 + "_02") * rst.Fields(thena1 + "_02") + rst.Fields(kolichvo1 + "_03") * rst.Fields(thena1 + "_03") + _
+        rst.Fields(kolichvo1 + "_04") * rst.Fields(thena1 + "_04") + rst.Fields(kolichvo1 + "_05") * rst.Fields(thena1 + "_05") + rst.Fields(kolichvo1 + "_06") * rst.Fields(thena1 + "_06") + _
+        rst.Fields(kolichvo1 + "_07") * rst.Fields(thena1 + "_07") + rst.Fields(kolichvo1 + "_08") * rst.Fields(thena1 + "_08") + rst.Fields(kolichvo1 + "_09") * rst.Fields(thena1 + "_09") + _
+        rst.Fields(kolichvo1 + "_10") * rst.Fields(thena1 + "_10") + rst.Fields(kolichvo1 + "_11") * rst.Fields(thena1 + "_11") + rst.Fields(kolichvo1 + "_12") * rst.Fields(thena1 + "_12")
+        rs.Fields("obem1") = Round(ob1 / 1000, 1)
+        If kol1 = 0 Then rs.Fields("zena1") = 0 Else rs.Fields("zena1") = (Round((ob1 / kol1), 1)) * dopoln
+        rs.Fields("Naim") = rst.Fields("Naim")
+        rs.Fields("Zakaz") = rst.Fields("Zakaz")
+        rs.Fields("Nom_dog") = rst.Fields("Nom_dog")
+        rs.Fields("Kod_OKP") = rst.Fields("Kod_OKP")
+        rs.Fields("Primechanie") = rst.Fields("Primechanie")
+        rs.Update
+      End If
+      rst.MoveNext
+    Loop
+  End If
+  rs.Close
+  rst.Close
+  '3) Завершение работы
+  Set rst = CurrentDb.OpenRecordset("Т_переменная")
+  If rst.EOF = True Then
+    DoCmd.OpenForm "Меню"
+    MsgBox "Данные отсутствуют", vbCritical, "Ошибка:"
+    rst.Close
+    Exit Sub
+  End If
+  rst.Close
+  DoCmd.OpenForm "Ф_настройка_печати_2"
+  
+End Sub
