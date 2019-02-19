@@ -1,0 +1,59 @@
+Public Sub Atap()
+'Выполнение всех этапов последовательно
+
+  Call Atap0
+  Call Atap1
+  Call Atap2
+  Call Atap3
+  'Внимание! После преобразования проводится ещё много ручных корректировок
+  'удаление повторов, корректировка ФИО, кор. адресов, кор. ЮЛ, добавление поля uch для 112
+
+End Sub
+
+Public Sub Atap0()
+'Импорт реестра осуществляется в ручную
+'с предварительной одготовкой Exel графика
+End Sub
+
+Public Sub Atap1()
+'Установка физических лиц
+
+  Set rst = CurrentDb.OpenRecordset("tblReestr")
+  rst.MoveFirst
+  Do Until rst.EOF = True
+    If rst.Fields("vid1") = "" Or IsNull(rst.Fields("vid1")) = True Then
+      rst.Edit
+      rst.Fields("vid1") = 1
+      rst.Update
+    End If
+    rst.MoveNext
+  Loop
+  rst.Close
+  MsgBox "Расчёт №1 завершён", vbInformation, "УИТ"
+
+End Sub
+
+Public Sub Atap2()
+'Установка у физических лиц ФИО большими буквами
+
+  Set rst = CurrentDb.OpenRecordset("tblReestr")
+  rst.MoveFirst
+  Do Until rst.EOF = True
+    rst.Edit
+    rst.Fields("fio2") = BigLetter(rst.Fields("fio1"))
+    rst.Update
+    rst.MoveNext
+  Loop
+  rst.Close
+  MsgBox "Расчёт №2 завершён", vbInformation, "УИТ"
+
+End Sub
+
+Public Sub Atap3()
+'Установка цеха и таб. ном. для работающих акционеров
+
+  DoCmd.DeleteObject acTable, "tblReestr2"
+  CurrentDb.Execute ("З_объединение_2")
+  MsgBox "Расчёт №3 завершён", vbInformation, "УИТ"
+
+End Sub
