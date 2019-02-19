@@ -1,0 +1,81 @@
+Public Function otch01() As Boolean
+Dim n1, n2, n3, n4, n5, n, np As String
+Dim ds11, ds21, ds22, ds31, ds32 As String
+'Данные за день
+
+  'Установка параметров
+  otch01 = False
+  Call ClearTabl("Т_переменная")
+  ds11 = DLookup("den", "addition") + "." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  ds21 = DLookup("den1", "addition") + "." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  ds22 = ds11
+  ds31 = "01." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  ds32 = ds11
+  'Расчёт основоной части
+  Set rs = CurrentDb.OpenRecordset("Т_переменная")
+  s = "SELECT tblStatB.KodST, tblStatB.prsum, tblStatB.NameST1, tblStatB.NameST2"
+  s = s + " FROM tblStatB WHERE (((CInt(Left([KodST], 1))) <> 0)) ORDER BY tblStatB.KodST"
+  Set rst = CurrentDb.OpenRecordset(s)
+  rst.MoveFirst
+  Do Until rst.EOF = True
+    rs.AddNew
+    n1 = Mid(rst.Fields("KodST"), 1, 1)
+    n2 = Mid(rst.Fields("KodST"), 3, 2)
+    n3 = Mid(rst.Fields("KodST"), 6, 2)
+    n4 = Mid(rst.Fields("KodST"), 9, 2)
+    n5 = Mid(rst.Fields("KodST"), 12, 2)
+    n = rst.Fields("KodST")
+    np = "            "
+    If CInt(n5) = 0 Then
+      n = n1 + "." + n2 + "." + n3 + "." + n4 + ".**"
+      np = "        "
+    End If
+    If CInt(n5) = 0 And CInt(n4) = 0 Then
+      n = n1 + "." + n2 + "." + n3 + ".**.**"
+      np = "    "
+    End If
+    If CInt(n5) = 0 And CInt(n4) = 0 And CInt(n3) = 0 Then
+      n = n1 + "." + n2 + ".**.**.**"
+      np = ""
+    End If
+    i = 1
+    If CInt(n1) = 1 And CInt(n2) > 4 Then i = 3
+    If CInt(n1) = 2 Then i = 7
+    If CInt(n1) = 3 Then i = 10
+    If CInt(n1) = 4 Then i = 16
+    rs.Fields("vidok") = i
+    rs.Fields("KodST") = rst.Fields("KodST")
+    rs.Fields("NameST1") = rst.Fields("NameST1")
+    rs.Fields("NameST2") = np + Nz(rst.Fields("NameST2"), "")
+    rs.Fields("prsum") = IIf(rst.Fields("prsum") = 0, 1, 0)
+    Call ItogObSt2(n, ds31, ds32)
+    rs.Fields("ob_01") = sumPlan
+    rs.Fields("ob_08") = sumFakt
+    Call ItogObSt2(n, ds11, ds11)
+    rs.Fields("ob_02") = sumFakt1
+    rs.Fields("ob_03") = sumFakt2
+    rs.Fields("ob_04") = sumFakt3
+    rs.Fields("ob_05") = sumFakt4
+    rs.Fields("ob_06") = sumFakt
+    Call ItogObSt2(n, ds21, ds22)
+    rs.Fields("ob_07") = sumFakt
+    rs.Fields("ob_09") = rs.Fields("ob_08") - rs.Fields("ob_01")
+    rs.Update
+    rst.MoveNext
+  Loop
+  rst.Close
+  rs.Close
+  'Завершение работы
+  Set rst = CurrentDb.OpenRecordset("Т_переменная")
+  If rst.EOF = True Then
+    MsgBox "Данные по поиску отсутствуют", vbCritical, "Ошибка:"
+  Else
+    otch01 = True
+  End If
+  'Добавление итоговых позиций
+  Call ItogObStr
+  Call ItogOb01
+  'Удаление нулевых строк
+  Call DeleteNull
+  
+End Function
