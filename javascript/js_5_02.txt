@@ -1,0 +1,16 @@
+function expandCollapse(elem1,elem2)
+//Функция разворачивания и скрывания списка
+{
+ecBlock1 = document.getElementById(elem1);
+ecBlock2 = document.getElementById(elem2);
+if (ecBlock1.currentStyle.display == "none")
+  {
+  ecBlock1.style.display = "block";
+  if (!(elem2=="net")) {ecBlock2.src="12pr_find_2.gif";}
+  }
+else if (ecBlock1.currentStyle.display == "block")
+  {
+  ecBlock1.style.display = "none";
+  if (!(elem2=="net")) {ecBlock2.src="12pr_find_1.gif";}
+  }
+}
