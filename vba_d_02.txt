@@ -1,0 +1,189 @@
+Private Sub Кнопка72_Click()
+Dim ExlDb As New Excel.Application
+Dim WrkBk As Workbook
+Dim WrkSht As Worksheet
+Dim rngActive As Range
+Dim rngInput As Range
+Dim CEH, UCH, fio, prof, TABN, MO, GO As String
+Dim dob, k As Integer
+'Вывод данных в Excell
+  
+  If Nz(Me.ctlCeh.Column(0), "") = "" Or Nz(Me.ctlfio.Column(0), "") = "" Then
+    MsgBox "Необходимо выбрать одного работника", vbCritical, "Ошибка:"
+  Else
+    CEH = Me.ctlfio.Column(5)
+    UCH = Me.ctlfio.Column(1)
+    fio = Me.ctlfio.Column(2)
+    TABN = Me.ctlfio.Column(3)
+    prof = Me.ctlfio.Column(4)
+    ExlDb.Visible = True
+    Set WrkBk = ExlDb.Workbooks.Add
+    Set WrkSht = WrkBk.ActiveSheet
+    Set rngActive = WrkSht.Cells(1, 1)
+    rngActive.Activate
+    rngActive = CEH + " - " + Me.ctlCeh.Column(1)
+    rngActive.Font.Size = 10
+    rngActive.Font.Bold = True
+    With WrkSht.Range(rngActive, rngActive.Offset(0, 7))
+      .Merge
+      .HorizontalAlignment = xlHAlignCenter
+      .VerticalAlignment = xlVAlignCenter
+    End With
+    Set rngActive = WrkSht.Cells(2, 1)
+    rngActive.Activate
+    rngActive = fio + " (таб. № " + TABN + ")"
+    rngActive.Font.Size = 10
+    rngActive.Font.Bold = True
+    With WrkSht.Range(rngActive, rngActive.Offset(0, 7))
+      .Merge
+      .HorizontalAlignment = xlHAlignCenter
+      .VerticalAlignment = xlVAlignCenter
+    End With
+    Set rngActive = WrkSht.Cells(3, 1)
+    rngActive.Activate
+    rngActive = prof
+    rngActive.Font.Size = 10
+    rngActive.Font.Bold = True
+    With WrkSht.Range(rngActive, rngActive.Offset(0, 7))
+      .Merge
+      .HorizontalAlignment = xlHAlignCenter
+      .VerticalAlignment = xlVAlignCenter
+    End With
+    '---------------Сводная информация---------------------------
+    Set rngActive = WrkSht.Cells(5, 1)
+    rngActive.Activate
+    rngActive = "Сводная информация"
+    rngActive.Font.Size = 12
+    rngActive.Font.Bold = True
+    With WrkSht.Range(rngActive, rngActive.Offset(0, 7))
+      .Merge
+      .HorizontalAlignment = xlLeft
+      .VerticalAlignment = xlVAlignCenter
+    End With
+    Set rngActive = WrkSht.Cells(6, 1)
+    rngActive.Activate
+    With rngActive
+      .Value = "Месяц"
+      .Offset(0, 1) = "Год"
+      .Offset(0, 2) = "Отр. часы"
+      .Offset(0, 3) = "Общ. сум."
+      .Offset(0, 4) = "Ср. по подр."
+      .Offset(0, 5) = "Отклон."
+      .Offset(0, 6) = "Ср. по проф."
+      .Offset(0, 7) = "Отклон."
+    End With
+    With WrkSht.Range(rngActive, rngActive.Offset(0, 7))
+      .RowHeight = .RowHeight * 2.1
+      .HorizontalAlignment = xlVAlignCenter
+      .VerticalAlignment = xlVAlignCenter
+      .WrapText = True
+    End With
+    strSQL = "SELECT tblRab2.MO, tblRab2.GO, tblRab2.SUMT, tblRab2.SUM, tblRab2.AVGCEH, tblRab2.DCEH,"
+    strSQL = strSQL + " tblRab2.AVGPROFES, tblRab2.DPROFES FROM tblRab2 WHERE (((tblRab2.tabn) = '" + TABN + "') and ((tblRab2.ceh) = '" + CEH + "') and ((tblRab2.uch) = '" + UCH + "'))"
+    strSQL = strSQL + " ORDER BY tblRab2.MO DESC , tblRab2.GO DESC"
+    Set rst = CurrentDb.OpenRecordset(strSQL)
+    If rst.EOF = False Then
+      rst.MoveFirst
+      dob = 6
+      For i = 1 To rst.RecordCount
+        Set rngActive = WrkSht.Cells(dob + i, 1)
+        rngActive.Activate
+        For j = 0 To (rst.Fields.Count - 1)
+          rngActive.Offset(0, j).Value = rst.Fields(j).Value
+        Next j
+        rst.MoveNext
+      Next i
+    End If
+    Set rngActive = WrkSht.Cells(6, 1)
+    rngActive.Activate
+    WrkSht.Range(rngActive, rngActive.Offset(rst.RecordCount, 7)).Borders.LineStyle = xlContinuous
+    dob = dob + rst.RecordCount + 1
+    rst.Close
+    '---------------Разбивка по месецам и видам оплат-----------------
+    Set rngActive = WrkSht.Cells(dob + 1, 1)
+    rngActive.Activate
+    rngActive = "Разбивка по месецам и видам оплат"
+    rngActive.Font.Size = 12
+    rngActive.Font.Bold = True
+    With WrkSht.Range(rngActive, rngActive.Offset(0, 7))
+      .Merge
+      .HorizontalAlignment = xlLeft
+      .VerticalAlignment = xlVAlignCenter
+    End With
+    dob = dob + 3
+    strSQL = "SELECT tblRab2.MO, tblRab2.GO FROM tblRab2 WHERE (((tblRab2.tabn) = '" + TABN + "') and ((tblRab2.ceh) = '" + CEH + "') and ((tblRab2.uch) = '" + UCH + "'))"
+    strSQL = strSQL + " ORDER BY tblRab2.MO DESC , tblRab2.GO DESC"
+    Set rstSQL = CurrentDb.OpenRecordset(strSQL)
+    If rstSQL.EOF = False Then
+      For i = 1 To rstSQL.RecordCount
+        Set rngActive = WrkSht.Cells(dob, 1)
+        rngActive.Activate
+        rngActive = "        " + PerevodMes(CStr(rstSQL.Fields("MO").Value)) + " " + CStr(CInt(rstSQL.Fields("GO").Value) + 2000) + " г."
+        rngActive.Font.Size = 10
+        rngActive.Font.Bold = True
+        With WrkSht.Range(rngActive, rngActive.Offset(0, 7))
+          .Merge
+          .HorizontalAlignment = xlLeft
+          .VerticalAlignment = xlVAlignCenter
+        End With
+        dob = dob + 1
+        Set rngActive = WrkSht.Cells(dob, 1)
+        rngActive.Activate
+        With rngActive
+          .Value = "Сумма"
+          .Offset(0, 1) = "Дни"
+          .Offset(0, 1).HorizontalAlignment = xlVAlignCenter
+          .Offset(0, 2) = "Часы"
+          .Offset(0, 2).HorizontalAlignment = xlVAlignCenter
+          .Offset(0, 3) = "Код"
+          .Offset(0, 3).HorizontalAlignment = xlVAlignCenter
+          .Offset(0, 4) = "Расшифровка кода вида оплат"
+          .Offset(0, 4).HorizontalAlignment = xlVAlignCenter
+        End With
+        Set rngActive = WrkSht.Cells(dob, 5)
+        rngActive.Activate
+        WrkSht.Range(rngActive, rngActive.Offset(0, 3)).Merge
+        dob = dob + 1
+        MO = Right("00" + CStr(rstSQL.Fields("MO").Value), 2)
+        GO = Right("00" + CStr(rstSQL.Fields("GO").Value), 2)
+        strSQL = "SELECT zpt.SUM, zpt.DNI, zpt.CHAS, zpt.VOPL, VOPL.NAIM FROM zpt LEFT JOIN VOPL ON zpt.VOPL = VOPL.VOPL"
+        strSQL = strSQL + " WHERE (((zpt.tabn) = '" + TABN + "') And ((zpt.MO) = '" + MO + "') And ((zpt.GO) = '" + GO + "') And ((zpt.ceh) = '" + CEH + "') And ((zpt.uch) = '" + UCH + "')) ORDER BY zpt.VOPL"
+        Set rst = CurrentDb.OpenRecordset(strSQL)
+        If rst.EOF = False Then
+          k = dob - 1
+          Do Until rst.EOF = True
+            Set rngActive = WrkSht.Cells(dob, 1)
+            rngActive.Activate
+            For j = 0 To (rst.Fields.Count - 1)
+              rngActive.Offset(0, j).Value = rst.Fields(j).Value
+              rngActive.Offset(0, j).HorizontalAlignment = xlVAlignCenter
+              rngActive.Offset(0, j).VerticalAlignment = xlVAlignCenter
+            Next j
+            Set rngActive = WrkSht.Cells(dob, 5)
+            rngActive.Activate
+            With WrkSht.Range(rngActive, rngActive.Offset(0, 3))
+              .Merge
+              .RowHeight = .RowHeight * 2.1
+              .HorizontalAlignment = xlLeft
+              .VerticalAlignment = xlVAlignCenter
+              .WrapText = True
+            End With
+            dob = dob + 1
+            rst.MoveNext
+          Loop
+          Set rngActive = WrkSht.Cells(k, 1)
+          rngActive.Activate
+          WrkSht.Range(rngActive, rngActive.Offset(dob - k - 1, 7)).Borders.LineStyle = xlContinuous
+        End If
+        rst.Close
+        dob = dob + 1
+        rstSQL.MoveNext
+      Next i
+    End If
+    rstSQL.Close
+    Set WrkSht = Nothing
+    Set WrkBk = Nothing
+    Set ExlDb = Nothing
+  End If
+  
+End Sub
