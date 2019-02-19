@@ -1,0 +1,142 @@
+Public Sub otch017()
+Dim i1, i2, dopoln As Integer
+Dim kol1, ob1, ob2 As Single
+Dim mes As String
+'Объём производства по трудоёмкости
+
+  '1) Подготовка к работе с таблицей
+  Call OpredelParam
+  Call ClearTabl("Т_переменная")
+  sum1 = 0: sum2 = 0: sum3 = 0: sum4 = 0: sum5 = 0: sum6 = 0: sum7 = 0: sum8 = 0: sum9 = 0: sum10 = 0: sum11 = 0: sum12 = 0
+  sumU1 = 0: sumU2 = 0: sumU3 = 0: sumU4 = 0: sumU5 = 0
+  sumU6 = 0: sumU7 = 0: sumU8 = 0: sumU9 = 0: sumU10 = 0: sumU11 = 0: sumU12 = 0: sumU13 = 0: sumU14 = 0: sumU15 = 0
+  Select Case Period
+    Case "1"
+      i1 = 1: i2 = 1
+    Case "2"
+      i1 = 2: i2 = 2
+    Case "3"
+      i1 = 2: i2 = 2
+    Case "4"
+      i1 = 3: i2 = 3
+    Case "5"
+      i1 = 1: i2 = 3
+    Case "6"
+      i1 = 4: i2 = 4
+    Case "7"
+      i1 = 4: i2 = 4
+    Case "8"
+      i1 = 5: i2 = 5
+    Case "9"
+      i1 = 5: i2 = 5
+    Case "10"
+      i1 = 6: i2 = 6
+    Case "11"
+      i1 = 6: i2 = 6
+    Case "12"
+      i1 = 4: i2 = 6
+    Case "13"
+      i1 = 7: i2 = 7
+    Case "14"
+      i1 = 7: i2 = 7
+    Case "15"
+      i1 = 8: i2 = 8
+    Case "16"
+      i1 = 8: i2 = 8
+    Case "17"
+      i1 = 9: i2 = 9
+    Case "18"
+      i1 = 9: i2 = 9
+    Case "19"
+      i1 = 7: i2 = 9
+    Case "20"
+      i1 = 10: i2 = 10
+    Case "21"
+      i1 = 10: i2 = 10
+    Case "22"
+      i1 = 11: i2 = 11
+    Case "23"
+      i1 = 11: i2 = 11
+    Case "24"
+      i1 = 12: i2 = 12
+    Case "25"
+      i1 = 1: i2 = 12
+    Case "26"
+      i1 = 10: i2 = 12
+  End Select
+  sum11 = CSng(InputBox("Бюджет рабочего времени (Пример: 1736)", "Ввод №1", "0"))
+  If IsNull(sum11) = True Or sum11 = 0 Then
+    DoCmd.OpenForm "Меню"
+    MsgBox "Данные введены не правильно", vbCritical, "Ошибка:"
+    Exit Sub
+  End If
+  sum12 = CSng(InputBox("Переработку норм выработки в % (Пример: 120)", "Ввод №2", "0"))
+  If IsNull(sum12) = True Or sum12 = 0 Then
+    DoCmd.OpenForm "Меню"
+    MsgBox "Данные введены не правильно", vbCritical, "Ошибка:"
+    Exit Sub
+  End If
+  sum13 = CSng(InputBox("Коэффициент ППП (Пример: 4,26)", "Ввод №3", "0"))
+  If IsNull(sum13) = True Or sum13 = 0 Then
+    DoCmd.OpenForm "Меню"
+    MsgBox "Данные введены не правильно", vbCritical, "Ошибка:"
+    Exit Sub
+  End If
+  thena2 = "Work"
+  '2) Расчет и копирование данных
+  Set rst = CurrentDb.OpenRecordset("З_весь_год")
+  Set rs = CurrentDb.OpenRecordset("Т_переменная")
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Do Until rst.EOF = True
+      kol1 = 0: ob1 = 0: ob2 = 0
+      For i = i1 To i2
+        mes = IIf(Len(CStr(i)) = 1, "0" + CStr(i), CStr(i))
+        kol1 = kol1 + rst.Fields(kolichvo1 + "_" + mes)
+        ob1 = ob1 + (rst.Fields(thena1 + "_" + mes) * rst.Fields(kolichvo1 + "_" + mes))
+        ob2 = ob2 + (rst.Fields(thena2 + "_" + mes) * rst.Fields(kolichvo1 + "_" + mes))
+      Next i
+      If rst.Fields("UCH") = 99 Then
+        sum1 = sum1 + Round(ob1 / 1000, 1)
+        sum2 = sum2 + Round(ob2, 1)
+        sum3 = sum3 + Round(ob2 / (sum11 * sum12 / 100), 1)
+        sum4 = sum4 + Round((Round(ob2 / (sum11 * sum12 / 100), 1)) * sum13, 1)
+      End If
+      If rst.Fields("UCH") = 100 Then
+        sumU1 = sumU1 + Round(ob1 / 1000, 1)
+        sumU2 = sumU2 + Round(ob2, 1)
+        sumU3 = sumU3 + Round(ob2 / (sum11 * sum12 / 100), 1)
+        sumU4 = sumU4 + Round((Round(ob2 / (sum11 * sum12 / 100), 1)) * sum13, 1)
+      End If
+      If rst.Fields("Uch") <> 99 And rst.Fields("Uch") <> 100 Then
+        rs.AddNew
+        If rst.Fields("Edizm") = 2 Then dopoln = 0 Else dopoln = 1
+        If kol1 <> 0 Then rs.Fields("zena1") = Round(ob1 / kol1, 2) * dopoln
+        If kol1 <> 0 Then rs.Fields("zena2") = Round(ob2 / kol1, 2) * dopoln
+        rs.Fields("kolvo1") = kol1 * dopoln
+        rs.Fields("obem1") = Round(ob1 / 1000, 1)
+        rs.Fields("obem2") = Round(ob2, 1)
+        rs.Fields("obem3") = Round(ob2 / (sum11 * sum12 / 100), 1)
+        rs.Fields("obem4") = Round((Round(ob2 / (sum11 * sum12 / 100), 1)) * sum13, 1)
+        rs.Fields("Naim") = rst.Fields("Naim")
+        rs.Fields("Zakaz") = rst.Fields("Zakaz")
+        rs.Fields("Nom_dog") = rst.Fields("Nom_dog")
+        rs.Update
+      End If
+      rst.MoveNext
+    Loop
+  End If
+  rs.Close
+  rst.Close
+  '3) Завершение работы
+  Set rst = CurrentDb.OpenRecordset("Т_переменная")
+  If rst.EOF = True Then
+    DoCmd.OpenForm "Меню"
+    MsgBox "Данные отсутствуют", vbCritical, "Ошибка:"
+    rst.Close
+    Exit Sub
+  End If
+  rst.Close
+  DoCmd.OpenForm "Ф_настройка_печати_2"
+
+End Sub
