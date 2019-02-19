@@ -1,0 +1,35 @@
+function openPic(pic,w2,h2)
+//Открытие рисунка в отдельном окне
+//pic - путь; w2 - длина рисунка; h2  - ширина рисунка
+{
+var page=new String("");
+var h=new Number(0);
+var w=new Number(0);
+var dop = new Number(0);
+
+h=screen.height-280;
+w=screen.width-20;
+dop=document.body.scrollTop;
+w=(w-w2+36)/2;
+h=((h-h2+52)/2)+dop;
+
+page="<table align='center' cellSpacing='0' cellPadding='0' border='0' bgcolor='#FFFFFF'>";
+page=page+"<tr><td height='0' width='18'></td><td width='"+(w2-17)+"'></td><td width='17'></td><td width='18'></td></tr>";
+page=page+"<tr><td height='34' background='images2/ramka1_1.gif'></td><td background='images2/ramka1_3.gif'></td><td colspan=2 valign='midle'><a href='javascript: closePic();'><img src='images2/ramka1_2.gif' width='35px' height='34px' border=0></a></td></tr>";
+page=page+"<tr><td height='"+h2+"' background='images2/ramka2_1.gif'></td><td background='"+pic+"' colspan=2></td><td background='images2/ramka4_1.gif'></td></tr>";
+page=page+"<tr><td height='18' background='images2/ramka3_1.gif'></td><td background='images2/ramka3_3.gif' colspan=2></td><td background='images2/ramka3_2.gif'></td></tr>";
+page=page+"</table>";
+document.getElementById("divPic").innerHTML=page;
+var objToc = document.getElementById("divPic");
+objToc.style.left = w + "px";
+objToc.style.top = h + "px";
+}
+
+function closePic()
+//Закрытие рисунка
+{
+var objToc = document.getElementById("divPic");
+objToc.style.pixelLeft = 0;
+objToc.style.pixelTop = -1000;
+document.getElementById("divPic").innerHTML="";
+}
