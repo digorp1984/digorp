@@ -1,0 +1,34 @@
+function failRazmer($path)
+//Определение размера файла округлённо до Кб или Мб. Размер до 2ГБ
+{
+$size="";
+$ob=round(((filesize($path))/1024),0);
+if ($ob > 1000)
+  {
+  $size=(round(($ob/1024),1)) . " Мб";
+  }
+  else
+  {
+  $size=$ob . " Кб";
+  }
+return $size;
+}
+
+function txtClear($rab)
+//Очистка текстового файла от
+//    1. тегов
+{
+$itog="";
+$read=true;
+for ($j = 0; $j <= strlen($rab); $j++)
+  {
+  $s=substr($rab,$j,1);
+  if ($s=="<")
+    {$read=false;}
+  if ($s==">")
+    {$read=true;}
+  if (($read==true) && ($s!==">"))
+    {$itog=$itog . $s;}
+  }
+return $itog;
+}
