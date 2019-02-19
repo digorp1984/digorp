@@ -1,0 +1,56 @@
+function openHtml(rab)
+//Открытие раздела сайта (по центру)
+{
+vidThag(rab);
+var s = new String("Сообщение");
+var s2 = new String("htm");
+if (rab == "price") {s2="xml"}
+if (rab == "news2") {rab="news"; s2="php?id=2"}
+var our_text = "<IFRAME onload='javascript: setOpen(";
+our_text=our_text + '"myframe","content"';
+our_text=our_text + ");' height=0 width=0 style='visibility:hidden' SRC='"+rab+"."+s2+"' id='myframe'></IFRAME>";
+dynamiccontent('content',our_text);
+}
+
+function setOpen(obj1,obj2)
+//Дополнительная функция к openHtml
+{
+var html = new String("");
+var ua = navigator.userAgent.toLowerCase();
+if (ua.indexOf('gecko') != -1)
+  {
+  //Если браузер Mozilla, или Firefox, или Netscape
+  var el = document.getElementById(obj1).contentDocument;
+  var el2 = el.getElementsByTagName('body')[0];
+  }
+else
+  {
+  //Для остальных браузеров
+  var el = document.getElementById(obj1).contentWindow;
+  var el2 = el.document.body;
+  }
+html=el2.innerHTML;
+dynamiccontent(obj2,html);
+}
+
+function dynamiccontent(elementid,content)
+//Дополнительная функция к openHtml
+{
+var our_div = document.getElementById(elementid);
+var ua = navigator.userAgent.toLowerCase();
+if (ua.indexOf('gecko') != -1)
+  {
+  //Если браузер Mozilla, или Firefox, или Netscape
+  rng = document.createRange();
+  rng.setStartBefore(our_div);
+  htmlFrag = rng.createContextualFragment(content);
+  while (our_div.hasChildNodes())
+  our_div.removeChild(our_div.lastChild);
+  our_div.appendChild(htmlFrag);
+  }
+else
+  {
+  //Для остальных браузеров
+  our_div.innerHTML = content;
+  }
+}
