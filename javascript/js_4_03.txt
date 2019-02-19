@@ -1,0 +1,72 @@
+function find()
+//Построение списка по полученным куки
+{
+var inputS = new String("");
+if ((!(p1 == "no")) || (!(p2 == "no")) || (!(p3 == "no")) || (!(p4 == "no")) || (!(p5 == "no")))
+  {
+  
+try
+  {
+  var sql = new String("");
+  var dbConn = new ActiveXObject("ADODB.Connection");
+  //------подключение----
+  var drv = new String("");
+  drv=document.location.href;
+  dbConn.Open("DRIVER={Microsoft Access Driver (*.mdb)};DBQ="+drv.substr(8,1)+":\\12production\\BASE\\PLAN.mdb;Uid=Admin;Pwd=");
+  //---------------------
+  var i = new Number(0);
+  var wh = new String(where());
+  for (i=1;i<=6;i++)
+    {
+    var rst=new ActiveXObject("ADODB.Recordset");
+    sql="SELECT tblPasport.*, tblMaterial.* FROM tblMaterial RIGHT JOIN tblPasport ON tblMaterial.kod = tblPasport.kodMaterial";
+    if (!(p1 == "no"))
+      {
+      if ((i+"") == p1) {drv="1"} else {drv="x"}
+      sql=sql+" WHERE ((mid([tblPasport].[OUT],"+p1+",1)) = '"+drv+"') ORDER BY tblPasport.NAIM, tblPasport.GRAVIR;";
+      }
+    else
+      {
+      sql=sql+" WHERE (((mid([tblPasport].[OUT],"+i+",1)) = '1')"+wh+") ORDER BY tblPasport.NAIM, tblPasport.GRAVIR;";
+      }
+    rst.Open(sql,dbConn);
+    if (rst.EOF==false)
+      {
+      inputS=inputS+"<table width=480px align=center>";
+      inputS=inputS+"<tr><td width=480px class='links1'><IMG name=but"+i+" width=10px src='12pr_find_1.gif'><a href='javascript: ";
+      inputS=inputS+'expandCollapse("elem'+i+'","but'+i+'");';
+      document.write(inputS); inputS="";
+      inputS=inputS+"'>"+nameIzd(i)+"</a></td></tr></table>";
+      document.write(inputS); inputS="";
+      inputS=inputS+"<DIV id=elem"+i+" style='DISPLAY: none'>";
+      inputS=inputS+"<table width=480 align=center>";
+      document.write(inputS); inputS="";
+      while (!rst.EOF)
+        {
+        inputS=inputS+"<tr valign=middle><td width=60></td><td width=420 bgcolor=#a9a9a9 class='links2'><a href='javascript: ";
+        inputS=inputS+'find2("'+rst.Fields("id").Value+'");';
+        inputS=inputS+"'>"+rst.Fields("NAIM").Value+" - "+rst.Fields("GRAVIR").Value+"</a></td></tr>";
+        document.write(inputS); inputS="";
+        rst.MoveNext();
+        }
+      inputS=inputS+"</table></DIV>";
+      }
+    rst=null;
+    }
+  document.write(inputS);
+  inputS=null;
+  dbConn=null;
+  }
+catch (e) 
+  {
+  alert("Ошибка подключения, обратитесь к программисту");
+  }
+  
+  }
+else
+  {
+  inputS=inputS+"<br><br><br><br>";
+  inputS=inputS+"<center><font class='N12'>...... Задайте поиск</font></center>";
+  document.write(inputS);
+  }
+}
