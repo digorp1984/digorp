@@ -1,0 +1,80 @@
+include("function.php");
+include("bazaFfiles.php");
+
+//Начальные параметры
+$txt=$_GET["txt"];
+
+//Получение кол-ва поисковых страниц
+$count=-1;
+foreach ($arrFind as $value)
+  {
+  $count++;
+  }
+
+//Поиск
+$uslov=false;
+$count2=-1;
+for ($i = 0; $i <= $count; $i++)
+  {
+  $handle = fopen($arrFind[$i]['kode2'], "r");
+  while (!feof($handle))
+    {
+    $buffer = fgets($handle, 4096);
+    $buffer=txtClear($buffer);
+    if (stristr($buffer, $txt))
+      {
+      //Найдено
+      $count2++;
+      $arrPrint2['kode']=$arrFind[$i]['kode'];
+      $arrPrint2['kode2']=$arrFind[$i]['kode2'];
+      $arrPrint2['name']=$arrFind[$i]['name'];
+      $arrPrint2['prim']=$arrFind[$i]['prim'];
+      $arrPrint[]=$arrPrint2;
+      $uslov=true;
+      break;
+      }
+    }
+  fclose($handle);
+  }
+
+
+//Вывод результата
+?>
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+  <LINK href="system/mystyle.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+
+<?php222
+
+echo "<br><center><font class='text'><b>";
+echo "Введённое слово для поиска - '" . $txt . "'<br>ниже приведены ссылки где было обнаружено совпадение";
+echo "</b></font></center>";
+echo "<br>";
+if ($uslov==true)
+  {
+  for ($i = 0; $i <= $count2; $i++)
+    {
+    $dob='openHtml("' . $arrPrint[$i]['kode'] . '")';
+    echo "<a href='javascript: " . $dob . ";'><font class='text3'><b>";
+    echo $arrPrint[$i]['name'];
+    echo "</b></font><a>";
+    }
+  }
+else
+  {
+  echo "<br><center><font class='text'><b>";
+  echo "СОВПАДЕНЕЙ НЕ ОБНАРУЖЕНО";
+  echo "</b></font></center>";
+  }
+echo "<br><center><font class='text'><b>";
+echo "<br><br>Примечание: в запросе не имеет значения заглавнае буквы или нет.";
+echo "</b></font></center>";
+
+?>
+
+</body>
+</html>
