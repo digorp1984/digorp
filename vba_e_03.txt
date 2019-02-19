@@ -1,0 +1,23 @@
+Public Function LogicFind(ByVal NameTbl, NameKolon, FindStr As String, ByVal MaxProth As Single) As Boolean
+'Логический поиск (результатом явл таблица в базе данных с наиденым - LogicFindTbl)
+'Результат функции True - нашел, False - ненашел
+  
+  LogicFind = False
+  'Создание таблицы для записи найденногого
+  If CheckTbl("LogicFindTbl") = True Then DoCmd.DeleteObject acTable, "LogicFindTbl"
+  DoCmd.CopyObject , "LogicFindTbl", acTable, NameTbl
+  'Выборка, уравнивание шрифта из основного массива
+  FindStr = PerStr(FindStr)
+  Set rs = CurrentDb.OpenRecordset("LogicFindTbl")
+  If rs.EOF = True Then Exit Function
+  rs.MoveFirst
+  Do Until rs.EOF = True
+    s = IIf(IsNull(rs.Fields(NameKolon)) = True, "пусто", rs.Fields(NameKolon))
+    If WhatPr(FindStr, PerStr(s)) < MaxProth Then rs.Delete
+    rs.MoveNext
+  Loop
+  If rs.EOF = False Then LogicFind = True
+  If LogicFind = False Then DoCmd.DeleteObject acTable, "LogicFindTbl"
+  rs.Close
+
+End Function
