@@ -1,0 +1,93 @@
+function openDnipogd()
+//Построение дней рождений по подразделению
+  {  
+  //Подготовка данных
+  var dt,i=0,i2=0;s="";
+  dt = new Date();
+  i=dt.getMonth()+1;
+  i2=dt.getDate();
+  var podr1=new String();
+  var podr2=new String();
+  var podr=new String(opredKodPodr(document.me.find1.value));
+  podr1=podr.substr(0,3);
+  if (podr1=="000")
+    {
+    alert("Вы не выбрали подразделение");
+    document.me.find1.value="000";
+    }
+  else  
+    {//Если подразделение введено правильно то запускаем построение
+    
+  podr2=podr.substring(4,(podr.length));
+  //Построение таблицы
+  document.clear;
+  document.write("<html>");
+  document.write("<head>");
+  document.write("<meta http-equiv='Content-Type' content='text/html; charset=windows-1251'>");
+  document.write("<style>");
+  document.write("BODY {");
+  document.write("SCROLLBAR-FACE-COLOR: #339900; SCROLLBAR-HIGHLIGHT-COLOR: #d1ccb9; SCROLLBAR-SHADOW-COLOR: #d1ccb9; SCROLLBAR-3DLIGHT-COLOR: #000099; SCROLLBAR-ARROW-COLOR: #000099; SCROLLBAR-TRACK-COLOR: #d1ccb9; SCROLLBAR-DARKSHADOW-COLOR: #000099; SCROLLBAR-BASE-COLOR: #d1ccb9");
+  document.write("}");
+  document.write("</style>");
+  document.write("</head>");
+  document.write("<body bgcolor='#d1ccb9' link='#000000' vlink='#000000' alink='#000000' leftmargin='0' topmargin='0' marginwidth='0' marginheight='0'>");
+  document.write("<font size=5><p align=center>Дни рождения работников "+podr2+"</p></font>");
+  document.write("<font size=1><p align=center>Запрос составлен по ID = "+GetCookie('UserAsupID')+" на сайте ОАСУП ОАО 'КМЗ'</p></font>");
+  document.write("<table width='500' border='#000000' align='center' cellpadding='3' cellspacing='1' class='catalog'>");
+  document.write("<tr bgColor=#000099 align='middle'>");
+  document.write("<td width='10%'><font color='#ffffff'>Дата</font></td>");
+  document.write("<td width='90%'><font color='#ffffff'>Фамилия Имя Отчество</font></td>");
+  document.write("</tr>");  
+try
+  {
+  dbConn = new ActiveXObject("ADODB.Connection");
+  dbConn.Open("Driver={SQL Server};Server=SASUP;Database=KadrKmth;","GuestSQL","1");
+  var rst;
+  var sql;
+  sql="SELECT TOP 100 PERCENT FIO, SUBSTRING(DROJ, 3, 2) AS mes, SUBSTRING(DROJ, 1, 2) AS den, DROJ";
+  sql=sql+" FROM dbo.KADR01 WHERE (KD = N'1') AND (CEH = N'"+podr1+"')";
+  sql=sql+" ORDER BY SUBSTRING(DROJ, 3, 2), SUBSTRING(DROJ, 1, 2)";
+  rst = dbConn.Execute(sql);
+  var mes=new String(rst.Fields("mes"));
+  document.write("<tr align='middle'>");
+  document.write("<td colspan=2><font size=4 color=#990066><p align=left>"+perevodMes(mes,1)+"</font></P></td>");
+  document.write("</tr>");
+  while (rst.EOF==false)
+    {
+    if (mes<rst.Fields("mes"))
+      {
+      mes=""+rst.Fields("mes")+"";
+      document.write("<tr align='middle'>");
+      document.write("<td colspan=2><font size=4 color=#990066><p align=left>"+perevodMes(mes,1)+"</font></P></td>");
+      document.write("</tr>");
+      }
+    s="<tr align='middle'>";  
+    if (i==mes)
+      {
+      s="<tr align='middle' bgcolor='#009900'>"
+      if (i2>rst.Fields("den")) s="<tr align='middle'>";
+      }
+    document.write(s);
+    document.write("<td><p align=centr>"+rst.Fields("den")+"</p></td>");
+    document.write("<td><p align=left>&nbsp;"+rst.Fields("FIO")+"</p></td>");
+    document.write("</tr>");
+    rst.MoveNext();
+    }  
+  rst.close();
+  dbConn.Close();
+  }
+catch (e) 
+  {
+  alert ("Неустановленно подключение к данным");
+  }  
+  document.write("</table>");
+  document.write("<br>");
+  document.write("<center>");
+  document.write("<a onMouseOver='document.pic.src='../images/назад2.jpg'' onMouseOut='document.pic.src='../images/назад1.jpg''><IMG onclick='javascript: window.history.back();' name='pic' src='../images/назад1.jpg' alt='Шаг назад'></a>");
+  document.write("</center>");
+  document.write("<br><br>");
+  document.write("</body>");
+  document.write("</html>");
+    
+    }//Закрытие условия на проверку подразделения
+  }
