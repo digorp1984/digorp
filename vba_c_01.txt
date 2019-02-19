@@ -1,0 +1,35 @@
+Private Sub Report_Open(Cancel As Integer)
+Dim sql As String
+'Установка начальных параметров и стандартных полей
+
+ DoCmd.Maximize
+ Me.ctl11.ControlSource = "='" + CStr(Nz(DLookup("ctl11", "tblNastoiki"), "")) + "'"
+ If (Nz(DLookup("srok", "tblNastoiki"), "") <> "Дата отгрузки: #     Накладные: #") Then
+   Me.ctl1_1.Visible = False
+   Me.ctl1_2.Visible = False
+   Me.txt1_1.Visible = False
+   Me.txt1_2.Visible = False
+   If Nz(DLookup("srok", "tblNastoiki"), "") <> "---  пусто  ---" Then
+     Me.ctl1_3.ControlSource = "='" + CStr(Nz(DLookup("srok", "tblNastoiki"), "")) + "'"
+   End If
+ End If
+ If (Nz(DLookup("ctl12", "tblNastoiki"), "") = "") Or (Nz(DLookup("ctl12", "tblNastoiki"), "") = "отсутствует") Then
+   Me.ctl12.ControlSource = "=''"
+ Else
+   Me.ctl12.ControlSource = "='" + CStr(Nz(DLookup("ctl12", "tblNastoiki"), "")) + "'"
+ End If
+ Me.ctl21.ControlSource = "='" + CStr(Nz(DLookup("ctl21", "tblNastoiki"), "")) + "'"
+ If (Nz(DLookup("ctl22", "tblNastoiki"), "") = "") Or (Nz(DLookup("ctl22", "tblNastoiki"), "") = "отсутствует") Then
+   Me.ctl22.ControlSource = "=''"
+ Else
+   Me.ctl22.ControlSource = "='" + CStr(Nz(DLookup("ctl22", "tblNastoiki"), "")) + "'"
+ End If
+ Me.ctl3.ControlSource = "='" + CStr(Nz(DLookup("schet1", "tblNastoiki"), "")) + " " + CStr(Nz(DLookup("schet2", "tblNastoiki"), "")) + " БИК 041708602  К/С № 30101810000000000602'"
+ Me.ctlvid.ControlSource = "='" + CStr(Nz(DLookup("vid", "tblNastoiki"), "")) + "'"
+ If (Nz(DLookup("gruz", "tblNastoiki"), "") = "") Or (Nz(DLookup("gruz", "tblNastoiki"), "") = "---  из массива  ---") Then
+   Me.ctlGruz.ControlSource = "=[PLAT1] & ' ' & [PLAT10] & ' ' & [ADR]"
+ Else
+   Me.ctlGruz.ControlSource = "='" + CStr(Nz(DLookup("gruz", "tblNastoiki"), "")) + "'"
+ End If
+ 
+End Sub
