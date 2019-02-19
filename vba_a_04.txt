@@ -1,0 +1,51 @@
+Public Function otch04() As Boolean
+Dim n1, n2, n As String
+Dim ds11, ds21, ds22, ds31, ds32 As String
+'Данные за день
+
+  'Установка параметров
+  otch04 = False
+  Call ClearTabl("Т_переменная")
+  ds11 = DLookup("den", "addition") + "." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  ds21 = DLookup("den1", "addition") + "." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  ds22 = DLookup("den2", "addition") + "." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  ds31 = "01." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  i = CInt(DLookup("mes", "addition")) + 1
+  If i > 12 Then i = 1
+  ds32 = CStr(CDate("01." + CStr(i) + "." + DLookup("god", "addition")) - 1)
+  'Расчёт основоной части
+  Set rs = CurrentDb.OpenRecordset("Т_переменная")
+  s = "SELECT tblStatB.KodST, tblStatB.prsum, tblStatB.NameST1, tblStatB.NameST2"
+  s = s + " FROM tblStatB WHERE (((CInt(Left([KodST], 1))) = 0)) ORDER BY tblStatB.KodST"
+  Set rst = CurrentDb.OpenRecordset(s)
+  rst.MoveFirst
+  Do Until rst.EOF = True
+    rs.AddNew
+    n1 = Mid(rst.Fields("KodST"), 1, 1)
+    n2 = Mid(rst.Fields("KodST"), 3, 2)
+    n = n1 + "." + n2 + ".**.**.**"
+    rs.Fields("vidok") = 0
+    rs.Fields("KodST") = rst.Fields("KodST")
+    rs.Fields("NameST2") = rst.Fields("NameST2")
+    Call ItogObSt2(n, ds11, ds11)
+    rs.Fields("ob_01") = sumFakt
+    Call ItogObSt2(n, ds21, ds22)
+    rs.Fields("ob_02") = sumFakt
+    Call ItogObSt2(n, ds31, ds32)
+    rs.Fields("ob_03") = sumFakt
+    rs.Update
+    rst.MoveNext
+  Loop
+  rst.Close
+  rs.Close
+  'Завершение работы
+  Set rst = CurrentDb.OpenRecordset("Т_переменная")
+  If rst.EOF = True Then
+    MsgBox "Данные по поиску отсутствуют", vbCritical, "Ошибка:"
+  Else
+    otch04 = True
+  End If
+  'Удаление нулевых строк
+  Call DeleteNull
+  
+End Function
