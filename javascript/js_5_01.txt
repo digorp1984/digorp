@@ -1,0 +1,112 @@
+unction find1()
+//Создание списка изделия \ гравировка
+{
+//Предварительная загрузка даты
+  var s = new String("");
+  s=document.location.href;
+  var nom = new Number(s.search("dt="));
+  if (nom == -1)
+    {
+    //Загрузка даты по умолчанию - текущей
+    var it = new String("");
+    var dt = new Date();
+    s=dt.getDate()+"";
+    if (s.length<2) {it=it+"0"+s+".";} else {it=it+s+".";}
+    s=(dt.getMonth()+1)+"";
+    if (s.length<2) {it=it+"0"+s+".";} else {it=it+s+".";}
+    s=dt.getFullYear()+"";
+    it=it+s;
+    rabDate=it;//Перепресваивание паблик переменной
+    }
+  else
+    {
+    //Загрузка выбранной даты
+    rabDate=s.substr((s.length-12),10);//Перепресваивание паблик переменной
+    }
+  Sort="ORDER BY Material";
+  NSort=1;
+  document.me.butSort1.style.filter="alpha(opacity=100)";
+  document.me.butSort2.style.filter="alpha(opacity=30)";
+  document.me.butSort3.style.filter="alpha(opacity=30)";
+  s=document.location.href;
+  s=s.substr((s.length-1),1);
+  if (s == "2")
+    {
+    Sort="ORDER BY Sum(IIf((((Mid([dataPM],7,4))='"+rabDate.substr(6,4)+"') AND ((((Mid([dataPM],1,2))<'"+rabDate.substr(0,2)+"') AND ((Mid([dataPM],4,2))='"+rabDate.substr(3,2)+"')) OR ((Mid([dataPM],4,2))<'"+rabDate.substr(3,2)+"'))) OR ((Mid([dataPM],7,4))<'"+rabDate.substr(6,4)+"'),[PM],0))";
+    NSort=2;
+    document.me.butSort1.style.filter="alpha(opacity=30)";
+    document.me.butSort2.style.filter="alpha(opacity=100)";
+    document.me.butSort3.style.filter="alpha(opacity=30)";
+    }
+  if (s == "3")
+    {
+    Sort="ORDER BY Sum(IIf(((Mid([dataPM],7,4))='"+rabDate.substr(6,4)+"') AND ((Mid([dataPM],1,2))='"+rabDate.substr(0,2)+"') AND ((Mid([dataPM],4,2))='"+rabDate.substr(3,2)+"'),[PM],0)) DESC;";
+    NSort=3;
+    document.me.butSort1.style.filter="alpha(opacity=30)";
+    document.me.butSort2.style.filter="alpha(opacity=30)";
+    document.me.butSort3.style.filter="alpha(opacity=100)";
+    }
+//Создание списка
+try
+  {
+  var inputS = new String("");
+  var sql = new String("");
+  var dbConn = new ActiveXObject("ADODB.Connection");
+  //------подключение----
+  var drv = new String("");
+  drv=document.location.href;
+  dbConn.Open("DRIVER={Microsoft Access Driver (*.mdb)};DBQ=C:\\12production\\BASE\\PLAN.mdb");
+  //---------------------
+  var rst=new ActiveXObject("ADODB.Recordset");
+  //0,2 - ден; 3,2 - мес; 6,4 - год;
+  
+  sql="SELECT tblMaterial.Material, tblMaterial.Razmern, tblMaterial.Kod,";
+  sql=sql+" Sum(IIf(((Mid([dataPM],7,4))='"+rabDate.substr(6,4)+"') AND ((Mid([dataPM],1,2))='"+rabDate.substr(0,2)+"') AND ((Mid([dataPM],4,2))='"+rabDate.substr(3,2)+"'),[PM],0)) AS SumVzatie,";
+  sql=sql+" Sum(IIf((((Mid([dataPM],7,4))='"+rabDate.substr(6,4)+"') AND ((((Mid([dataPM],1,2))<'"+rabDate.substr(0,2)+"') AND";
+  sql=sql+" ((Mid([dataPM],4,2))='"+rabDate.substr(3,2)+"')) OR ((Mid([dataPM],4,2))<'"+rabDate.substr(3,2)+"'))) OR ((Mid([dataPM],7,4))<'"+rabDate.substr(6,4)+"'),[PM],0)) AS SumOst";
+  sql=sql+" FROM tblMaterial LEFT JOIN tblMaterialPM ON tblMaterial.kod = tblMaterialPM.kod";
+  sql=sql+" GROUP BY tblMaterial.Material, tblMaterial.Razmern, tblMaterial.kod "+Sort;
+
+  sql="SELECT tbSprlMaterial.Material, tbSprlMaterial.Razmern, tblMaterial.kod, 0 AS SumVzatie, 0 AS SumOst";
+  sql=sql+" FROM tbSprlMaterial RIGHT JOIN tblMaterial ON tbSprlMaterial.kod = tblMaterial.kodMaterial ORDER BY tbSprlMaterial.Material";
+
+  rst.Open(sql,dbConn);  
+  if (rst.EOF==false)
+    {
+    inputS=inputS+"<table width=480 align=center cellpadding=1 cellspacing=1 bgcolor=#000000>";
+    document.write(inputS); inputS="";
+    var Prixod = new Number(0);
+    var Ost = new Number(0);
+    while (!rst.EOF)
+      {
+      jNom++;
+      Prixod=rst.Fields("SumVzatie")+0;
+      Ost=rst.Fields("SumOst")+0;
+      //Вывод позиции по материалу
+      inputS=inputS+"<tr valign=middle id=vdel_"+jNom+"><td width=325 bgcolor=#d1ccb9 class='links2'>";
+      inputS=inputS+"<a>"+rst.Fields("Material")+", "+rst.Fields("Razmern")+"</a>";
+      inputS=inputS+"<input name=kod_"+jNom+" value='"+rst.Fields("kod")+"' type='text' class='nevidim' style='WIDTH: 0px;' readonly>";
+      inputS=inputS+"<input name=obold_"+jNom+" value="+Prixod+" type='text' class='nevidim' style='WIDTH: 0px;' readonly></td>";
+      document.write(inputS); inputS="";
+      inputS=inputS+"<td width=80 bgcolor=#d1ccb9>";
+      inputS=inputS+"<input name=obost_"+jNom+" value="+Ost+" type='text' class='nevidim' style='WIDTH: 80px;' readonly>";
+      inputS=inputS+"</td>";      
+      inputS=inputS+"<td width=75 bgcolor=#d1ccb9>";
+      inputS=inputS+"<input name=ob_"+jNom+" value="+Prixod+" type='text' class='nevidim' style='WIDTH: 75px;' onfocus='javascript: ster=true;' onblur='javascript: provOb("+jNom+");' onkeydown='javascript: block1("+jNom+")'>";
+      inputS=inputS+"</td></tr>";
+      document.write(inputS); inputS="";
+      rst.MoveNext();
+      }
+    inputS=inputS+"</table>";
+    }
+  document.write(inputS);
+  rst=null;
+  inputS=null;
+  dbConn=null;
+  document.me.ob_1.focus();
+  }
+catch (e) 
+  {
+  alert("Ошибка подключения, обратитесь к программисту");
+  }
+}
