@@ -1,0 +1,69 @@
+Public Sub ItogOb03()
+Dim d, d1, d2 As String
+Dim s1, s2, s3, s4, s5, s6 As Currency
+'Итого объём по группе: 0,20 для отчёта 03
+
+  d = "01.01." + DLookup("god", "addition")
+  d1 = "01." + DLookup("mes", "addition") + "." + DLookup("god", "addition")
+  i = CInt(DLookup("mes", "addition")) + 1
+  If i > 12 Then i = 1
+  d2 = CStr(CDate("01." + CStr(i) + "." + DLookup("god", "addition")) - 1)
+  Set rs = CurrentDb.OpenRecordset("Т_переменная")
+  'Остаток на начало периода
+  rs.AddNew
+    rs.Fields("vidok") = 0
+    rs.Fields("prsum") = 0
+    'На начало дня
+    s1 = 0: s6 = 0
+    Call ItogObSt2("1.*", d, (CStr(CDate(d1) - 1)))
+    s1 = s1 + sumPlan
+    s6 = s6 + sumFakt
+    Call ItogObSt2("2.*", d, (CStr(CDate(d1) - 1)))
+    s1 = s1 - sumPlan
+    s6 = s6 - sumFakt
+    Call ItogObSt2("3.*", d, (CStr(CDate(d1) - 1)))
+    s1 = s1 - sumPlan
+    s6 = s6 - sumFakt
+    Call ItogObSt2("4.*", d, (CStr(CDate(d1) - 1)))
+    s1 = s1 + sumPlan
+    s6 = s6 + sumFakt
+    'Корректирующие обороты
+    Call ItogObSt3(d, (CStr(CDate(d1) - 1)))
+    s6 = s6 + sumFakt
+    'Запись данных
+    rs.Fields("ob_01") = s1
+    rs.Fields("ob_02") = s6
+    rs.Fields("ob_03") = s6 - s1
+    rs.Fields("ob_09") = 1 'для сохрания при удалении нулевых строк
+  rs.Update
+  'Остаток на конец
+  rs.AddNew
+    rs.Fields("vidok") = 20
+    rs.Fields("prsum") = 0
+    'На начало дня
+    s1 = 0: s6 = 0
+    Call ItogObSt2("1.*", d, d2)
+    s1 = s1 + sumPlan
+    s6 = s6 + sumFakt
+    Call ItogObSt2("2.*", d, d2)
+    s1 = s1 - sumPlan
+    s6 = s6 - sumFakt
+    Call ItogObSt2("3.*", d, d2)
+    s1 = s1 - sumPlan
+    s6 = s6 - sumFakt
+    Call ItogObSt2("4.*", d, d2)
+    s1 = s1 + sumPlan
+    s6 = s6 + sumFakt
+    'Корректирующие обороты
+    Call ItogObSt3(d, d2)
+    s6 = s6 + sumFakt
+    'Запись данных
+    rs.Fields("ob_01") = s1
+    rs.Fields("ob_02") = s6
+    rs.Fields("ob_03") = s6 - s1
+    rs.Fields("ob_09") = 1 'для сохрания при удалении нулевых строк
+  rs.Update
+  'Завершение
+  rs.Close
+
+End Sub
