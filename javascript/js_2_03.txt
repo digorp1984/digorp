@@ -1,0 +1,145 @@
+<?php2
+//Программа разработана Дебовым И.П. (2008 год)
+
+include("function.php");
+
+//Начальные параметры
+$id=$_GET["id"];
+$xmlt="news.xml";
+
+//Загрузка3 XML в массив - берётся готовый массив
+include("bazanews.php2");
+$count=-1;
+foreach ($array as $value)
+{
+  $count++;
+}
+
+//Сортировка массива по дате
+for ($i = 0; $i <= $count; $i++)
+  {
+  $s1=$array[$i]['dat'];
+  $maxI=$i;
+  for ($j = $i; $j <= $count; $j++)
+    {
+    $s2=$array[$j]['dat'];
+    if (maxDat($s1, $s2) == true)
+      {
+      $s1=$s2;
+      $maxI=$j;
+      }
+    }
+  if (!($i == $maxI))
+    {
+    $dat=$array[$i]['dat'];
+    $dat2=$array[$i]['dat2'];
+    $txt=$array[$i]['txt'];
+    $razmer=$array[$i]['razmer'];
+    $file=$array[$i]['file'];
+    $array[$i]['dat']=$array[$maxI]['dat'];
+    $array[$i]['dat2']=$array[$maxI]['dat2'];
+    $array[$i]['txt']=$array[$maxI]['txt'];
+    $array[$i]['razmer']=$array[$maxI]['razmer'];
+    $array[$i]['file']=$array[$maxI]['file'];
+    $array[$maxI]['dat']=$dat;
+    $array[$maxI]['dat2']=$dat2;
+    $array[$maxI]['txt']=$txt;
+    $array[$maxI]['razmer']=$razmer;
+    $array[$maxI]['file']=$file;
+    }
+  }
+
+//Вывод результата
+?>
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+  <LINK href="system/mystyle.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+
+<?php2
+if ($id == "1")
+  {
+  if ($count > 4) {$k=4;} else {$k=$count;}
+  for ($i = 0; $i <= $k; $i++)
+    {
+?>
+
+    <table width="221px" cellSpacing="0px" cellPadding="0px" border="0px" align="center" bgcolor="#b7bdb1" style="margin: 0px">
+    <tr>
+      <td height="4px">
+      </td>
+    </tr>
+    <tr>
+      <td>
+      <table width="200px" cellSpacing="0px" cellPadding="0px" border="0px" align="center">
+          <tr valign="middle">
+            <td height="20px" bgcolor="#9BA493" class="news1" align="center">
+              <font class="news2"><?php2 echo $array[$i]['dat2']; ?></font>
+            </td>
+          </tr>
+          <tr>
+            <td height="4px" bgcolor="#b7bdb1">
+            </td>
+          </tr>
+          <tr valign="middle">
+            <td height="80px" bgcolor="#e5e5e5" style="padding-left:6px;" align="center">
+              <font class="text"><?php2 echo $array[$i]['txt'] . "."; ?></font>
+              <br>
+              <b><font class="text" style="padding-Top:10px;display:block;"><?php2 echo "Размер файла: ~" . $array[$i]['razmer'] . ""; ?></font></b>
+           </td>
+          </tr>
+          <tr>
+            <td height="26px" bgcolor="#e5e5e5" align="right" valign="middle">
+              <a href=<?php2 echo "'download/" . $array[$i]['file'] . ".zip'"; ?> class="surl" style="margin: 0px 10px 0px 0px">Скачать</a>
+            </td>
+          </tr>
+      </table>
+      </td>
+    </tr>
+    </table>
+
+<?php2
+    }
+?>
+    <table width="221px" cellSpacing="0px" cellPadding="0px" border="0px" align="center" bgcolor="#b7bdb1" style="margin: 0px">
+      <tr>
+        <td height="4px">
+        </td>
+      </tr>
+      <tr>
+        <td height="20" background="images/ten2.png">
+        </td>
+      </tr>
+    </table>
+
+<?php2
+  }
+if ($id == "2")
+  {
+  for ($i = 5; $i <= $count; $i++)
+    {
+?>
+
+   <p align="center" style="MARGIN: 15px 20px 15px 20px">
+     <font class="text">
+     <b><?php2 echo $array[$i]['dat2']; ?></b>
+     <br><br>
+     <?php2 echo $array[$i]['txt'] . "."; ?>
+     </font>
+     <br><br>
+     <a href=<?php2 echo "'download/" . $array[$i]['file'] . ".zip'"; ?> class="surl"><?php2 echo "Скачать (Размер файла: ~" . $array[$i]['razmer'] . ")"; ?></a>
+   </p>
+   <table width="100%" cellSpacing="0px" cellPadding="0px" border="0px" bgcolor="#FFFFFF">
+     <tr><td height="1" background="images/tchk.png"></td></tr>
+   </table>
+
+<?php2
+    }
+  }
+?>
+
+</body>
+</html>
