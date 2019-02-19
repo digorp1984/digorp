@@ -1,0 +1,43 @@
+Sub ProvSp()
+Dim st, en, i, nt, nr, sst, sen As Integer
+Dim rng As Range
+'Проверка на удаление списка
+
+  st = Selection.Information(wdEndOfRangeRowNumber)
+  nt = ActiveDocument.Tables.Count - 1
+  nr = ActiveDocument.Tables(nt).Rows.Count
+If ActiveDocument.FormFields.Item(st + (ActiveDocument.FormFields.Count - 4 - nr)).CheckBox.Value = False Then
+  ActiveDocument.Unprotect ("")
+  '-----------------------------------
+  'Определения интервала удаляемых строк st-en
+  en = nr
+  sst = CInt(Left(CStr(ActiveDocument.Tables(nt).Cell(st, 1).Range.Text), Len(CStr(ActiveDocument.Tables(nt).Cell(st, 1).Range.Text)) - 1))
+  If sst = 3 Then
+    en = st
+  Else
+    For i = (st + 1) To nr
+      sen = CInt(Left(CStr(ActiveDocument.Tables(nt).Cell(i, 1).Range.Text), Len(CStr(ActiveDocument.Tables(nt).Cell(i, 1).Range.Text)) - 1))
+      If sst = 0 And (sen = 0 Or sen = 1 Or sen = 2) Then
+        en = i - 1
+        Exit For
+      End If
+      If sst = 2 And (sen = 1 Or sen = 2) Then
+        en = i - 1
+        Exit For
+      End If
+      If sst = 1 And (sen = 1) Then
+        en = i - 1
+        Exit For
+      End If
+    Next i
+  End If
+  'Удаление строк
+  Set rng = ActiveDocument.Tables(nt).Range
+  rng.SetRange Start:=ActiveDocument.Tables(nt).Rows(st).Range.Start, End:=ActiveDocument.Tables(nt).Rows(en).Range.End
+  rng.Select
+  Selection.Rows.Delete
+  '-----------------------------------
+  ActiveDocument.Protect Password:="", NoReset:=True, Type:=wdAllowOnlyFormFields
+End If
+
+End Sub
