@@ -1,0 +1,63 @@
+function loads()
+//Функция работает на страничке Guest.htm
+{
+var unID = GetCookie('UserAsupID');
+
+//Установка Inn
+document.me.txtInn.value=unID;
+
+//Установка ника и коментария
+try
+  {
+  dbConn = new ActiveXObject("ADODB.Connection");
+  dbConn.Open("Driver={SQL Server};Server=SASUP;Database=Temp;","GuestSQL","1");
+  var rst;
+  s="SELECT inn FROM dbo.tblUserInfo WHERE (inn = "+unID+")";
+  rst = dbConn.Execute(s);
+  if (rst.EOF==true)
+    {
+    dt = new Date();
+    s="insert into dbo.tblUserInfo (inn,DateOpen) values";
+    s=s+" ("+unID+", '"+dt.toLocaleString()+"')";
+    dbConn.Execute(s);    
+    }
+  rst.close();
+  s="SELECT nike, help1 FROM dbo.tblUserInfo WHERE (inn = "+unID+")";
+  rst = dbConn.Execute(s);
+  var s="";
+  document.me.txtNike.value=rst.fields("nike");
+  document.me.txtHelp1.value=rst.fields("help1");
+  rst.close();
+  dbConn.Close();
+  }
+catch (e) 
+  {
+  alert ("Упс №1, ошибочка вышла !");
+  }
+
+//Установка кол-ва посещений
+try
+  {
+  dbConn = new ActiveXObject("ADODB.Connection");
+  dbConn.Open("Driver={SQL Server};Server=SASUP;Database=Temp;","GuestSQL","1");
+  var rst;
+  s="SELECT polzov FROM dbo.tblRegistr WHERE (polzov = '"+unID+"')";
+  rst = dbConn.Execute(s);
+  var i=0;
+  while (rst.EOF==false)
+    {
+    i=i+1;
+    rst.MoveNext();
+    }
+  rst.close();
+  dbConn.Close();
+  document.me.txtKol.value=i;
+  }
+catch (e) 
+  {
+  alert ("Упс №2, ошибочка вышла !");
+  }
+
+//Установка любимого раздела
+document.me.txtLove.value="-Неизвестно-"
+}
