@@ -1,0 +1,173 @@
+Public Sub otch0052()
+Dim dopoln As Integer
+Dim ob11, ob12, ob13, ob21, ob22, ob23, ob31, ob32, ob33, ob41, ob42, ob43 As Double
+Dim kol11, kol12, kol21, kol22, kol31, kol32, kol41, kol42 As Currency
+Dim s1, s2, s3 As String
+'Отчёт: Динамическте ряды ТОЛЬКО по году расчёт для листа А3
+
+  '1) Подготовка к работе с таблицей
+  Select Case kolichvo1
+    Case "Proizvod_Plan", "Prod_Plan"
+      kolichvo1 = "Proizvod_Plan"
+      thena1 = "Zena_deist"
+      kolichvo2 = "Prod_Plan"
+      thena2 = "Zena_deist"
+      Oplata = "oplata_Plan"
+      Avans = "Ob_avans_Plan"
+    Case "Proizvod_Fakt", "Prod_Fakt"
+      kolichvo1 = "Proizvod_Fakt"
+      thena1 = "Zena_deist"
+      kolichvo2 = "Prod_Fakt"
+      thena2 = "Zena_deist"
+      Oplata = "oplata_Fakt"
+      Avans = "Ob_avans_Fakt"
+  End Select
+  '2) Расчет и копирование данных
+  Set rst = CurrentDb.OpenRecordset("З_весь_год")
+  Set rs = CurrentDb.OpenRecordset("Т_переменная")
+  If rst.EOF = True Then
+    rst.Close
+    rs.Close
+    Exit Sub
+  End If
+  rst.MoveFirst
+  Do Until rst.EOF = True
+    s1 = "_01": s2 = "_02": s3 = "_03"
+    ob11 = rst.Fields(kolichvo1 + s1) * rst.Fields(thena1 + s1) + rst.Fields(kolichvo1 + s2) * rst.Fields(thena1 + s2) + rst.Fields(kolichvo1 + s3) * rst.Fields(thena1 + s3)
+    ob12 = rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)
+    ob13 = (rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)) * ((rst.Fields("NDS") / 100) + 1)
+    kol11 = rst.Fields(kolichvo1 + s1) + rst.Fields(kolichvo1 + s2) + rst.Fields(kolichvo1 + s3)
+    kol12 = rst.Fields(kolichvo2 + s1) + rst.Fields(kolichvo2 + s2) + rst.Fields(kolichvo2 + s3)
+    s1 = "_04": s2 = "_05": s3 = "_06"
+    ob21 = rst.Fields(kolichvo1 + s1) * rst.Fields(thena1 + s1) + rst.Fields(kolichvo1 + s2) * rst.Fields(thena1 + s2) + rst.Fields(kolichvo1 + s3) * rst.Fields(thena1 + s3)
+    ob22 = rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)
+    ob23 = (rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)) * ((rst.Fields("NDS") / 100) + 1)
+    kol21 = rst.Fields(kolichvo1 + s1) + rst.Fields(kolichvo1 + s2) + rst.Fields(kolichvo1 + s3)
+    kol22 = rst.Fields(kolichvo2 + s1) + rst.Fields(kolichvo2 + s2) + rst.Fields(kolichvo2 + s3)
+    s1 = "_07": s2 = "_08": s3 = "_09"
+    ob31 = rst.Fields(kolichvo1 + s1) * rst.Fields(thena1 + s1) + rst.Fields(kolichvo1 + s2) * rst.Fields(thena1 + s2) + rst.Fields(kolichvo1 + s3) * rst.Fields(thena1 + s3)
+    ob32 = rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)
+    ob33 = (rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)) * ((rst.Fields("NDS") / 100) + 1)
+    kol31 = rst.Fields(kolichvo1 + s1) + rst.Fields(kolichvo1 + s2) + rst.Fields(kolichvo1 + s3)
+    kol32 = rst.Fields(kolichvo2 + s1) + rst.Fields(kolichvo2 + s2) + rst.Fields(kolichvo2 + s3)
+    s1 = "_10": s2 = "_11": s3 = "_12"
+    ob41 = rst.Fields(kolichvo1 + s1) * rst.Fields(thena1 + s1) + rst.Fields(kolichvo1 + s2) * rst.Fields(thena1 + s2) + rst.Fields(kolichvo1 + s3) * rst.Fields(thena1 + s3)
+    ob42 = rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)
+    ob43 = (rst.Fields(kolichvo2 + s1) * rst.Fields(thena2 + s1) + rst.Fields(kolichvo2 + s2) * rst.Fields(thena2 + s2) + rst.Fields(kolichvo2 + s3) * rst.Fields(thena2 + s3)) * ((rst.Fields("NDS") / 100) + 1)
+    kol41 = rst.Fields(kolichvo1 + s1) + rst.Fields(kolichvo1 + s2) + rst.Fields(kolichvo1 + s3)
+    kol42 = rst.Fields(kolichvo2 + s1) + rst.Fields(kolichvo2 + s2) + rst.Fields(kolichvo2 + s3)
+    If rst.Fields("Uch") = 99 Then
+      sum1 = Round(ob11 / 1000, 1)
+      sum2 = Round(ob12 / 1000, 1)
+      sum3 = Round(ob13 / 1000, 1)
+      sum4 = Round(ob21 / 1000, 1)
+      sum5 = Round(ob22 / 1000, 1)
+      sum6 = Round(ob23 / 1000, 1)
+      sum7 = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1)
+      sum8 = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1)
+      sum9 = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1)
+      sum10 = Round(ob31 / 1000, 1)
+      sum11 = Round(ob32 / 1000, 1)
+      sum12 = Round(ob33 / 1000, 1)
+      sum13 = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1) + Round(ob31 / 1000, 1)
+      sum14 = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1) + Round(ob32 / 1000, 1)
+      sum15 = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1) + Round(ob33 / 1000, 1)
+      sum16 = Round(ob41 / 1000, 1)
+      sum17 = Round(ob42 / 1000, 1)
+      sum18 = Round(ob43 / 1000, 1)
+      sum19 = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1) + Round(ob31 / 1000, 1) + Round(ob41 / 1000, 1)
+      sum20 = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1) + Round(ob32 / 1000, 1) + Round(ob42 / 1000, 1)
+      sum21 = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1) + Round(ob33 / 1000, 1) + Round(ob43 / 1000, 1)
+    End If
+    If rst.Fields("Uch") = 100 Then
+      sumU1 = Round(ob11 / 1000, 1)
+      sumU2 = Round(ob12 / 1000, 1)
+      sumU3 = Round(ob13 / 1000, 1)
+      sumU4 = Round(ob21 / 1000, 1)
+      sumU5 = Round(ob22 / 1000, 1)
+      sumU6 = Round(ob23 / 1000, 1)
+      sumU7 = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1)
+      sumU8 = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1)
+      sumU9 = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1)
+      sumU10 = Round(ob31 / 1000, 1)
+      sumU11 = Round(ob32 / 1000, 1)
+      sumU12 = Round(ob33 / 1000, 1)
+      sumU13 = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1) + Round(ob31 / 1000, 1)
+      sumU14 = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1) + Round(ob32 / 1000, 1)
+      sumU15 = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1) + Round(ob33 / 1000, 1)
+      sumU16 = Round(ob41 / 1000, 1)
+      sumU17 = Round(ob42 / 1000, 1)
+      sumU18 = Round(ob43 / 1000, 1)
+      sumU19 = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1) + Round(ob31 / 1000, 1) + Round(ob41 / 1000, 1)
+      sumU20 = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1) + Round(ob32 / 1000, 1) + Round(ob42 / 1000, 1)
+      sumU21 = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1) + Round(ob33 / 1000, 1) + Round(ob43 / 1000, 1)
+    End If
+    If rst.Fields("Uch") <> 99 And rst.Fields("Uch") <> 100 Then
+      If rst.Fields("Edizm") = 2 Then dopoln = 0 Else dopoln = 1
+      rs.AddNew
+      'Занесение кол-в
+      rs.Fields("kolvo1") = kol11 * dopoln
+      rs.Fields("kolvo2") = kol12 * dopoln
+      rs.Fields("kolvo3") = kol21 * dopoln
+      rs.Fields("kolvo4") = kol22 * dopoln
+      rs.Fields("kolvo5") = (kol11 + kol21) * dopoln
+      rs.Fields("kolvo6") = (kol12 + kol22) * dopoln
+      rs.Fields("kolvo7") = kol31 * dopoln
+      rs.Fields("kolvo8") = kol32 * dopoln
+      rs.Fields("kolvo9") = (kol11 + kol21 + kol31) * dopoln
+      rs.Fields("kolvo10") = (kol12 + kol22 + kol32) * dopoln
+      rs.Fields("kolvo11") = kol41 * dopoln
+      rs.Fields("kolvo12") = kol42 * dopoln
+      rs.Fields("kolvo13") = (kol11 + kol21 + kol31 + kol41) * dopoln
+      rs.Fields("kolvo14") = (kol12 + kol22 + kol32 + kol42) * dopoln
+      'Занесение цен
+      If kol11 = 0 Then rs.Fields("zena1") = 0 Else rs.Fields("zena1") = Round(ob11 / kol11, 2) * dopoln
+      If kol12 = 0 Then rs.Fields("zena2") = 0 Else rs.Fields("zena2") = Round(ob12 / kol12, 2) * dopoln
+      If kol21 = 0 Then rs.Fields("zena3") = 0 Else rs.Fields("zena3") = Round(ob21 / kol21, 2) * dopoln
+      If kol22 = 0 Then rs.Fields("zena4") = 0 Else rs.Fields("zena4") = Round(ob22 / kol22, 2) * dopoln
+      If (kol11 + kol21) = 0 Then rs.Fields("zena5") = 0 Else rs.Fields("zena5") = Round((ob11 + ob21) / (kol11 + kol21), 2) * dopoln
+      If (kol12 + kol22) = 0 Then rs.Fields("zena6") = 0 Else rs.Fields("zena6") = Round((ob12 + ob22) / (kol12 + kol22), 2) * dopoln
+      If kol31 = 0 Then rs.Fields("zena7") = 0 Else rs.Fields("zena7") = Round(ob31 / kol31, 2) * dopoln
+      If kol32 = 0 Then rs.Fields("zena8") = 0 Else rs.Fields("zena8") = Round(ob32 / kol32, 2) * dopoln
+      If (kol11 + kol21 + kol31) = 0 Then rs.Fields("zena9") = 0 Else rs.Fields("zena9") = Round((ob11 + ob21 + ob31) / (kol11 + kol21 + kol31), 2) * dopoln
+      If (kol12 + kol22 + kol32) = 0 Then rs.Fields("zena10") = 0 Else rs.Fields("zena10") = Round((ob12 + ob22 + ob32) / (kol12 + kol22 + kol32), 2) * dopoln
+      If kol41 = 0 Then rs.Fields("zena11") = 0 Else rs.Fields("zena11") = Round(ob41 / kol41, 2) * dopoln
+      If kol42 = 0 Then rs.Fields("zena12") = 0 Else rs.Fields("zena12") = Round(ob42 / kol42, 2) * dopoln
+      If (kol11 + kol21 + kol31 + kol41) = 0 Then rs.Fields("zena13") = 0 Else rs.Fields("zena13") = Round((ob11 + ob21 + ob31 + ob41) / (kol11 + kol21 + kol31 + kol41), 2) * dopoln
+      If (kol12 + kol22 + kol32 + kol42) = 0 Then rs.Fields("zena14") = 0 Else rs.Fields("zena14") = Round((ob12 + ob22 + ob32 + ob42) / (kol12 + kol22 + kol32 + kol42), 2) * dopoln
+      'Основная часть объёмов
+      rs.Fields("obem1") = Round(ob11 / 1000, 1)
+      rs.Fields("obem2") = Round(ob12 / 1000, 1)
+      rs.Fields("obem3") = Round(ob13 / 1000, 1)
+      rs.Fields("obem4") = Round(ob21 / 1000, 1)
+      rs.Fields("obem5") = Round(ob22 / 1000, 1)
+      rs.Fields("obem6") = Round(ob23 / 1000, 1)
+      rs.Fields("obem7") = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1)
+      rs.Fields("obem8") = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1)
+      rs.Fields("obem9") = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1)
+      rs.Fields("obem10") = Round(ob31 / 1000, 1)
+      rs.Fields("obem11") = Round(ob32 / 1000, 1)
+      rs.Fields("obem12") = Round(ob33 / 1000, 1)
+      rs.Fields("obem13") = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1) + Round(ob31 / 1000, 1)
+      rs.Fields("obem14") = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1) + Round(ob32 / 1000, 1)
+      rs.Fields("obem15") = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1) + Round(ob33 / 1000, 1)
+      rs.Fields("obem16") = Round(ob41 / 1000, 1)
+      rs.Fields("obem17") = Round(ob42 / 1000, 1)
+      rs.Fields("obem18") = Round(ob43 / 1000, 1)
+      rs.Fields("obem19") = Round(ob11 / 1000, 1) + Round(ob21 / 1000, 1) + Round(ob31 / 1000, 1) + Round(ob41 / 1000, 1)
+      rs.Fields("obem20") = Round(ob12 / 1000, 1) + Round(ob22 / 1000, 1) + Round(ob32 / 1000, 1) + Round(ob42 / 1000, 1)
+      rs.Fields("obem21") = Round(ob13 / 1000, 1) + Round(ob23 / 1000, 1) + Round(ob33 / 1000, 1) + Round(ob43 / 1000, 1)
+      'Параметры позиции
+      rs.Fields("Naim") = rst.Fields("Naim")
+      rs.Fields("Zakaz") = rst.Fields("Zakaz")
+      rs.Fields("Nom_dog") = rst.Fields("Nom_dog")
+      rs.Fields("Kod_OKP") = rst.Fields("Kod_OKP")
+      rs.Fields("Primechanie") = rst.Fields("Primechanie")
+      rs.Update
+    End If
+    rst.MoveNext
+  Loop
+  rs.Close
+  rst.Close
+
+End Sub
