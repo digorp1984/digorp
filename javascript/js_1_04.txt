@@ -1,0 +1,58 @@
+function loading()
+//Функция загрузки парметров печати и поиска
+{
+var unID = GetCookie('UserAsupID');
+try
+  {
+  dbConn = new ActiveXObject("ADODB.Connection");
+  dbConn.Open("Driver={SQL Server};Server=SASUP;Database=Temp;","GuestSQL","1");
+  var rst;
+  s="SELECT inn FROM dbo.tblKadrCfg WHERE (inn = "+unID+")";
+  rst = dbConn.Execute(s);
+  if (rst.EOF==true)
+    {
+    //Установка нового параметра
+    s="insert into dbo.tblKadrCfg (inn) values ("+unID+")";
+    dbConn.Execute(s);    
+    }
+  else  
+    {
+    //Загрузка параметров
+    var rs;
+    s="SELECT * FROM dbo.tblKadrCfg WHERE (inn = "+unID+")";
+    rs = dbConn.Execute(s);
+	document.me.find2_1.value=rs.fields("pole1");
+	document.me.find2_2.value=rs.fields("pole2");
+	document.me.find2_10.value=rs.fields("pole3");
+	document.me.find2_15.value=rs.fields("pole4");
+	document.me.find2_11.value=rs.fields("pole5");
+	document.me.find2_16.value=rs.fields("pole6");
+	document.me.find2_12.value=rs.fields("pole7");
+	document.me.find2_17.value=rs.fields("pole8");
+	document.me.find2_13.value=rs.fields("pole9");
+	document.me.find2_18.value=rs.fields("pole10");
+	document.me.find2_14.value=rs.fields("pole11");
+	document.me.find2_19.value=rs.fields("pole12");
+	document.me.find21.value=rs.fields("pole13");
+	document.me.find22.value=rs.fields("pole14");
+	document.me.find23.value=rs.fields("pole15");
+	document.me.find24.value=rs.fields("pole16");
+	document.me.find25.value=rs.fields("pole17");
+	document.me.find26.value=rs.fields("pole18");
+	document.me.find27.value=rs.fields("pole19");
+	document.me.find28.value=rs.fields("pole20");
+	document.me.find29.value=rs.fields("pole21");
+	document.me.find30.value=rs.fields("pole22");
+	document.me.find31.value=rs.fields("pole23");
+	document.me.find32.value=rs.fields("pole24");
+	document.me.find33.value=rs.fields("pole25");
+    rs.close();
+    }
+  rst.close();
+  dbConn.Close();
+  }
+catch (e) 
+  {
+  alert ("Упс, ошибочка вышла !");
+  }
+}
