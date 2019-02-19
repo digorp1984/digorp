@@ -1,0 +1,31 @@
+Private Sub Form_Open(Cancel As Integer)
+'Загрузка данных, если по детали пусто
+  
+  Me.txt1.Caption = "Деталь №" & idDet
+  s = "SELECT * FROM tblK1 WHERE (((tblK1.DET)='" & idDet & "'))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  If rst.EOF = True Then
+    
+    Set rs = CurrentDb.OpenRecordset("tblK1")
+    s = "SELECT * FROM qwrKTD15 WHERE (((qwrKTD15.DET)='" & idDet & "'))"
+    Set rst2 = CurrentDb.OpenRecordset(s)
+    If rst2.EOF = False Then
+      rst2.MoveFirst
+      Do Until rst2.EOF = True
+        rs.AddNew
+        rs.Fields("det") = idDet
+        rs.Fields("op") = rst2.Fields("op")
+        rs.Update
+        rst2.MoveNext
+      Loop
+    End If
+    rst2.Close
+    rs.Close
+    
+  End If
+  rst.Close
+  Me.Requery
+  Me.Filter = "[det] = '" & idDet & "'"
+  Me.FilterOn = True
+  
+End Sub
