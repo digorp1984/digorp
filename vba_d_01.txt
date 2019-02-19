@@ -1,0 +1,68 @@
+Public Sub obnovBase()
+Dim avg1, avg2 As Double
+'Формирование основной рабочей внутренней таблицы
+
+  Call ClearTabl("tblRab")
+  Call ClearTabl("tblRab2")
+  'Заполнение первичных данных (стыковка кадров с ZPT)
+  Set rst = CurrentDb.OpenRecordset("З_связь")
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Set rs = CurrentDb.OpenRecordset("tblRab")
+    Do Until rst.EOF = True
+      rs.AddNew
+      rs.Fields("CEH") = Nz(rst.Fields("CEH"), "000")
+      rs.Fields("NpnnCEH") = Nz(rst.Fields("First-NPNN"), "-")
+      rs.Fields("UCH") = Nz(rst.Fields("UCH"), "00")
+      rs.Fields("TABN") = Nz(rst.Fields("TABN"), "00000")
+      rs.Fields("FIO") = Nz(rst.Fields("First-FIO"), "-")
+      rs.Fields("profes") = Nz(rst.Fields("profes"), "-")
+      rs.Fields("MO") = Nz(rst.Fields("MO"), "00")
+      rs.Fields("GO") = Nz(rst.Fields("GO"), "00")
+      rs.Fields("SUM") = CDbl(Nz(rst.Fields("ss"), 0))
+      rs.Fields("SUMT") = Round(rst.Fields("sumt"), 1)
+      rs.Fields("SUMT2") = Round(rst.Fields("sumt2"), 1)
+      rs.Update
+      rst.MoveNext
+    Loop
+    rs.Close
+  End If
+  rst.Close
+  'Заполнение средних значений и отклонений
+  s = "SELECT tblRab.CEH, tblRab.NpnnCEH, tblRab.UCH, tblRab.TABN, tblRab.FIO, tblRab.PROFES, tblRab.MO, tblRab.GO, tblRab.SUMT, tblRab.SUMT2,"
+  s = s + " tblRab.SUM, З_avgCEH.itog AS itog1, ([tblRab].[sum]-[З_avgCEH].[itog]) AS delt1, З_avgPROFES.itog AS itog2,"
+  s = s + " ([tblRab].[sum]-[З_avgPROFES].[itog]) AS delt2 FROM (tblRab LEFT JOIN З_avgCEH ON (tblRab.GO = З_avgCEH.GO)"
+  s = s + " AND (tblRab.MO = З_avgCEH.MO) AND (tblRab.CEH = З_avgCEH.CEH)) LEFT JOIN З_avgPROFES ON"
+  s = s + " (tblRab.GO = З_avgPROFES.GO) AND (tblRab.MO = З_avgPROFES.MO) AND (tblRab.PROFES = З_avgPROFES.PROFES)"
+  Set rst = CurrentDb.OpenRecordset(s)
+  If rst.EOF = False Then
+    rst.MoveFirst
+    Set rs = CurrentDb.OpenRecordset("tblRab2")
+    Do Until rst.EOF = True
+      rs.AddNew
+      rs.Fields("CEH") = rst.Fields("CEH")
+      rs.Fields("NpnnCEH") = rst.Fields("NpnnCEH")
+      rs.Fields("UCH") = rst.Fields("UCH")
+      rs.Fields("TABN") = rst.Fields("TABN")
+      rs.Fields("FIO") = rst.Fields("FIO")
+      rs.Fields("PROFES") = rst.Fields("PROFES")
+      rs.Fields("MO") = rst.Fields("MO")
+      rs.Fields("GO") = rst.Fields("GO")
+      rs.Fields("SUM") = rst.Fields("SUM")
+      rs.Fields("SUMT") = rst.Fields("SUMT")
+      rs.Fields("SUMT2") = rst.Fields("SUMT2")
+      rs.Fields("AVGCEH") = Nz(rst.Fields("itog1"), 0)
+      rs.Fields("DCEH") = Nz(rst.Fields("delt1"), 0)
+      rs.Fields("AVGPROFES") = Nz(rst.Fields("itog2"), 0)
+      rs.Fields("DPROFES") = Nz(rst.Fields("delt2"), 0)
+      rs.Update
+      rst.MoveNext
+    Loop
+    rs.Close
+  End If
+  rst.Close
+  'Завершение работы
+  Call ClearTabl("tblRab")
+  MsgBox "Расчёт данных закончен", vbExclamation, "Внимание:"
+
+End Sub
