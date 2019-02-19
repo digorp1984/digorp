@@ -1,0 +1,23 @@
+Private Sub ctlgod_AfterUpdate()
+Dim g As String
+Dim qwr As QueryDef
+'Изменение года массива
+  
+  Me.ctlgod.Requery
+  If Nz(Me.ctlgod.Value, "") = "" Then Exit Sub
+  g = CStr(Me.ctlgod.Value)
+  g = Right(g, 2)
+  sql = "SELECT FAKT" + g + "1.* FROM FAKT" + g + "1"
+  DoCmd.DeleteObject acQuery, "FAKT1"
+  Set qwr = CurrentDb.CreateQueryDef("FAKT1", sql)
+  qwr.Close
+  sql = "SELECT FAKT" + g + "2.* FROM FAKT" + g + "2"
+  DoCmd.DeleteObject acQuery, "FAKT2"
+  Set qwr = CurrentDb.CreateQueryDef("FAKT2", sql)
+  qwr.Close
+  CurrentDb.QueryDefs.Refresh
+  MsgBox "Массив был выбран удачно", vbInformation, "УИТ, Сбыт"
+  DoCmd.Close acForm, "Ф_выбор_года"
+  DoCmd.OpenForm "Меню"
+  
+End Sub
