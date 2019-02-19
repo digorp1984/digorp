@@ -1,0 +1,65 @@
+Private Sub oprPar()
+Dim d1, d2, kold, nd, nd1, nd2 As Integer
+Dim r1, r2, r3 As String
+'Настройка даты
+
+  r1 = Me.ctl_find1.Value
+  nd = CInt(r1)
+  r2 = Me.ctl_find2.Value
+  r3 = Me.ctl_find3.Value
+  kold = CInt(Mid(CStr((CDate("01." + CStr(CInt(r2) + 1) + "." + r3) - 1)), 1, 2))
+  If nd > kold Then
+    MsgBox "Этого дня в текущем месяце нет", vbCritical, "Ошибка:"
+    Exit Sub
+  End If
+  'Определение всех недель в месяце
+  d1 = 1
+  Me.ctl11.Value = "0" + CStr(d1)
+  d2 = 1 + (8 - Weekday(CDate("01." + r2 + "." + r3)))
+  Me.ctl12.Value = "0" + CStr(d2)
+  If nd >= d1 And nd <= d2 Then
+    nd1 = d1
+    nd2 = d2
+  End If
+  d1 = d2 + 1
+  Me.ctl21.Value = IIf(Len(CStr(d1)) = 1, "0", "") + CStr(d1)
+  d2 = d1 + 6
+  Me.ctl22.Value = IIf(Len(CStr(d2)) = 1, "0", "") + CStr(d2)
+  If nd >= d1 And nd <= d2 Then
+    nd1 = d1
+    nd2 = d2
+  End If
+  d1 = d2 + 1
+  Me.ctl31.Value = IIf(Len(CStr(d1)) = 1, "0", "") + CStr(d1)
+  d2 = d1 + 6
+  Me.ctl32.Value = IIf(Len(CStr(d2)) = 1, "0", "") + CStr(d2)
+  If nd >= d1 And nd <= d2 Then
+    nd1 = d1
+    nd2 = d2
+  End If
+  d1 = d2 + 1
+  Me.ctl41.Value = IIf(Len(CStr(d1)) = 1, "0", "") + CStr(d1)
+  d2 = d1 + 6
+  Me.ctl42.Value = IIf(Len(CStr(d2)) = 1, "0", "") + CStr(d2)
+  If nd >= d1 And nd <= d2 Then
+    nd1 = d1
+    nd2 = d2
+  End If
+  If (d2 + 1) > kold Then
+    Me.ctl51.Value = "00"
+    Me.ctl52.Value = "00"
+  Else
+    d1 = d2 + 1
+    Me.ctl51.Value = IIf(Len(CStr(d1)) = 1, "0", "") + CStr(d1)
+    d2 = kold
+    Me.ctl52.Value = IIf(Len(CStr(d2)) = 1, "0", "") + CStr(d2)
+    If nd >= d1 And nd <= d2 Then
+      nd1 = d1
+      nd2 = d2
+    End If
+  End If
+  'Текущая неделя
+  Me.ctl_01.Value = IIf(Len(CStr(nd1)) = 1, "0", "") + CStr(nd1)
+  Me.ctl_02.Value = IIf(Len(CStr(nd2)) = 1, "0", "") + CStr(nd2)
+    
+End Sub
