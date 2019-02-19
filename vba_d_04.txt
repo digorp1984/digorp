@@ -1,0 +1,25 @@
+Private Sub ctlfind1_AfterUpdate()
+Dim CEH As String
+'Вывод средней з\п по подрозделению
+  
+  CEH = Nz(Me.ctlfind1.Column(0), "")
+  strSQL = "SELECT First(tblRab2.AVGCEH) AS [AVG] FROM tblRab2"
+  strSQL = strSQL + " WHERE (((tblRab2.NpnnCEH)='" + Nz(Me.ctlfind1.Column(1), "") + "') AND ((tblRab2.MO)='" + Me.ctlmes.Value + "') AND ((tblRab2.GO)='" + Me.ctlgod.Value + "'))"
+  Set rst = CurrentDb.OpenRecordset(strSQL)
+  Me.ctlitog2.Value = Nz(rst.Fields("AVG").Value, 0)
+  rst.Close
+  s = "SELECT tblRab2.UCH, nz([NAIM],'-') AS naim2 FROM tblRab2 LEFT JOIN tblSprUch"
+  s = s + " ON (tblRab2.UCH = tblSprUch.UCH) AND (tblRab2.CEH = tblSprUch.CEH) GROUP BY tblRab2.UCH, nz([NAIM],'-'),"
+  s = s + " tblRab2.CEH HAVING (((tblRab2.CEH)='" + CEH + "'))"
+  Me.ctlfind4.RowSource = s
+  Me.ctlfind4.Value = ""
+  Me.ctlfind4.Requery
+  Me.ctlitog4.Value = 0
+  s = "SELECT tblRab2.PROFES FROM tblRab2"
+  s = s + " WHERE (((tblRab2.ceh) = '" + CEH + "')) GROUP BY tblRab2.PROFES ORDER BY tblRab2.PROFES"
+  Me.ctlfind5.RowSource = s
+  Me.ctlfind5.Value = ""
+  Me.ctlfind5.Requery
+  Me.ctlitog5.Value = 0
+  
+End Sub
