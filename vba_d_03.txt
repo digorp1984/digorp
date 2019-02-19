@@ -1,0 +1,32 @@
+Private Sub ctlfind2_AfterUpdate()
+'Вывод средней з\п по профессии
+  
+  strSQL = "SELECT First(tblRab2.AVGPROFES) AS [AVG] FROM tblRab2"
+  strSQL = strSQL + " WHERE (([PROFES]='" + CStr(Me.ctlfind2.Value) + "') AND ((tblRab2.MO)='" + CStr(Me.ctlmes.Value) + "') AND ((tblRab2.GO)='" + CStr(Me.ctlgod.Value) + "'))"
+  Set rst = CurrentDb.OpenRecordset(strSQL)
+  Me.ctlitog3.Value = Nz(rst.Fields("AVG").Value, 0)
+  rst.Close
+  
+End Sub
+
+Private Sub ctlfind4_AfterUpdate()
+'Расчёт средней по участку
+  
+  If Nz(Me.ctlfind4.Column(0), "") <> "" Then
+    strSQL = "SELECT Round(Avg([SUM]),2) AS SumAvg FROM tblRab2"
+    strSQL = strSQL + " WHERE (((tblRab2.MO)='" + CStr(Me.ctlmes.Value) + "') AND ((tblRab2.GO)='" + CStr(Me.ctlgod.Value) + "') AND ((tblRab2.CEH)='" + Me.ctlfind1.Column(0) + "') AND ((tblRab2.UCH)='" + Me.ctlfind4.Column(0) + "'))"
+    Set rst = CurrentDb.OpenRecordset(strSQL)
+    Me.ctlitog4.Value = Nz(rst.Fields("SumAvg").Value, 0)
+    rst.Close
+  End If
+
+End Sub
+
+Private Sub ctlfind5_AfterUpdate()
+'Вывод средней з\п по профессии внутри подразделения
+  strSQL = "SELECT First(tblRab2.AVGPROFES) AS [AVG] FROM tblRab2"
+  strSQL = strSQL + " WHERE (([PROFES]='" + CStr(Me.ctlfind5.Value) + "') AND ((tblRab2.MO)='" + CStr(Me.ctlmes.Value) + "') AND ((tblRab2.GO)='" + CStr(Me.ctlgod.Value) + "'))"
+  Set rst = CurrentDb.OpenRecordset(strSQL)
+  Me.ctlitog5.Value = Nz(rst.Fields("AVG").Value, 0)
+  rst.Close
+End Sub
