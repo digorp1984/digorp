@@ -1,0 +1,87 @@
+Public Sub makeItgKTD15()
+Dim s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10 As String
+Dim a0, a1, a2, a2i, a3, a4, a5 As String
+Dim b0, b1, b2, b3, b4, b5 As String
+Dim c0, c1, c2, c3, c4, c5 As String
+Dim prz As String
+'Окончательная выгрузка данных из таблиц, сформированных из XmlSearch
+  
+  CurrentDb.Execute ("DELETE * FROM KTD15ig")
+  Set rst = CurrentDb.OpenRecordset("qwrOper")
+  Set rs = CurrentDb.OpenRecordset("KTD15ig")
+  Do Until rst.EOF = True
+    s0 = "-": s1 = "": s2 = "": s3 = "": s4 = "": s5 = "": s6 = "": s7 = "": s8 = "": s9 = "": s10 = ""
+    a0 = "-": a1 = "": a2 = "": a3 = "": a4 = "": a5 = ""
+    b0 = "-": b1 = "": b2 = "": b3 = "": b4 = "": b5 = ""
+    c0 = "-": c1 = "": c2 = "": c3 = "": c4 = "": c5 = ""
+    prz = Nz(rst.Fields("fop").Value, "")
+    s0 = Nz(rst.Fields("idop").Value, "")
+    s1 = formValue(prz, "ОПЕР")
+    s2 = formValue(prz, "N_op")
+    s3 = formValue(prz, "N_ОП")
+    s4 = formValue(prz, "Т_оп")
+    s5 = formValue(prz, "ЦЕХ")
+    s6 = formValue(prz, "Втех")
+    s7 = formValue(prz, "Ppar")
+    s8 = formValue(prz, "Копк")
+    prz = Nz(rst.Fields("ftp").Value, "")
+    a0 = Nz(rst.Fields("idtp").Value, "")
+    a1 = formValue(prz, "cTPF")
+    a2 = formValue(prz, "NопТ")
+    a3 = formValue(prz, "ODoc")
+    a4 = formValue(prz, "NDoc")
+    a5 = formValue(prz, "field_ARCHIVE_ID_1")
+    prz = Nz(rst.Fields("fart").Value, "")
+    b0 = Nz(rst.Fields("idart").Value, "")
+    b1 = formValue(prz, "Обозначение")
+    b3 = formValue(prz, "Заводской номер")
+    If Nz(rst.Fields("ideq").Value, "") <> "" Then
+      prz = Nz(rst.Fields("feq").Value, "")
+      c0 = Nz(rst.Fields("ideq").Value, "")
+      c1 = formValue(prz, "ОБОР")
+      c2 = formValue(prz, "МОД")
+      c3 = formValue(prz, "A148")
+      c4 = formValue(prz, "РГЦ")
+    End If
+    a2 = a2 + ","
+    Do
+      a2i = Left(a2, InStr(a2, ",") - 1)
+      a2 = Right(a2, Len(a2) - InStr(a2, ","))
+      Do While Left(a2, 1) = " "
+        a2 = Right(a2, Len(a2) - 1)
+      Loop
+      rs.AddNew
+      rs.Fields("REFART").Value = b0
+      rs.Fields("REFTP").Value = a0
+      rs.Fields("REFOPER").Value = s0
+      rs.Fields("REFEQ").Value = c0
+      rs.Fields("GRAV").Value = b1
+      rs.Fields("DET1").Value = b3
+      rs.Fields("DET2").Value = delTchk(b3)
+      rs.Fields("OP0").Value = a1
+      rs.Fields("OP1").Value = b2
+      rs.Fields("OP2").Value = s2
+      rs.Fields("OP3").Value = s3
+      rs.Fields("OP4").Value = s4
+      rs.Fields("OP").Value = sborKoda(a1, a2i, s2, s3, s4)
+      rs.Fields("NAIMOP").Value = s1
+      rs.Fields("OBNAME").Value = c1
+      rs.Fields("OBMOD").Value = c2
+      rs.Fields("OBA148").Value = c3
+      rs.Fields("OBRGC").Value = c4
+      rs.Fields("OPCEH").Value = s5
+      rs.Fields("ODOC").Value = a3
+      rs.Fields("NDOC").Value = a4
+      rs.Fields("BTEX").Value = s6
+      rs.Fields("PPAR").Value = s7
+      rs.Fields("KOPK").Value = s8
+      rs.Fields("ARCHIVE_ID").Value = a5
+      rs.Update
+    Loop While a2 <> ""
+    rst.MoveNext
+  Loop
+  rs.Close
+  rst.Close
+  MsgBox "Расчёт завершён", vbInformation, "Внимание"
+  
+End Sub
