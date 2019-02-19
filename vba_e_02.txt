@@ -1,0 +1,16 @@
+Public Function pol(ByVal rab As String) As Integer
+'Определние пола по фамилии
+
+  For I = 1 To Len(rab)
+    If Mid(rab, I, 1) = " " Then
+      If Mid(rab, (I - 1), 1) = "А" Then
+        pol = 2 'Ж
+        Exit Function
+      Else
+        pol = 1 'М
+        Exit Function
+      End If
+    End If
+  Next I
+
+End Function
