@@ -1,0 +1,304 @@
+Private Sub Кнопка2_Click()
+Dim DET As String
+Dim ExlDb As New Excel.Application
+Dim WrkBk As Workbook
+Dim WrkSht As Worksheet
+Dim rngActive As Range
+Dim rngInput As Range
+Dim ip1, ip2 As Integer
+  
+  'Подготовка к работе
+  DET = Nz(Me.ctlDet.Value, "?")
+  ExlDb.Visible = True
+  Set WrkBk = ExlDb.Workbooks.Add
+  Set WrkSht = WrkBk.ActiveSheet
+  ip1 = 1
+  ip2 = 1
+  WrkSht.Cells.Select
+  WrkSht.Cells.NumberFormat = "@"
+
+
+If DET = "?" Then
+  s = "qwrDet"
+Else
+  s = "SELECT * FROM qwrDet WHERE (((qwrDet.DET)='" + DET + "'))"
+End If
+Set rs = CurrentDb.OpenRecordset(s)
+Do Until rs.EOF = True
+
+
+  DET = rs.Fields("DET").Value
+  If ip1 > ip2 Then ip2 = ip1 Else ip1 = ip2
+  
+  Set rngActive = WrkSht.Cells(ip1, 1)
+  rngActive.Activate
+  rngActive = rs.Fields("DET").Value + ", " + rs.Fields("GRAV_DET").Value + " (" + rs.Fields("NAIM_DET").Value + ")"
+  rngActive.Font.Size = 16
+  rngActive.Font.Bold = True
+  With WrkSht.Range(rngActive, rngActive.Offset(0, 8))
+    .Merge
+    .HorizontalAlignment = xlLeft
+    .VerticalAlignment = xlVAlignCenter
+    .Font.ColorIndex = 9
+  End With
+  Set rngActive = WrkSht.Cells(ip2, 11)
+  rngActive.Activate
+  rngActive = rs.Fields("DET").Value + ", " + rs.Fields("GRAV_DET").Value + " (" + rs.Fields("NAIM_DET").Value + ")"
+  rngActive.Font.Size = 16
+  rngActive.Font.Bold = True
+  With WrkSht.Range(rngActive, rngActive.Offset(0, 27))
+    .Merge
+    .HorizontalAlignment = xlLeft
+    .VerticalAlignment = xlVAlignCenter
+    .Font.ColorIndex = 9
+  End With
+  
+  'Выгрузка данных из KTD15
+  ip1 = ip1 + 1
+  Set rngActive = WrkSht.Cells(ip1, 1)
+  rngActive.Activate
+  rngActive = "KTD15"
+  rngActive.Font.Bold = True
+  With WrkSht.Range(rngActive, rngActive.Offset(0, 8))
+    .Merge
+    .HorizontalAlignment = xlVAlignCenter
+    .VerticalAlignment = xlVAlignCenter
+    .Font.ColorIndex = 48
+  End With
+  ip1 = ip1 + 1
+  Set rngActive = WrkSht.Cells(ip1, 1)
+  rngActive.Activate
+  With rngActive
+    .Value = "код опер."
+    .Offset(0, 1) = "наим. опер."
+    .Offset(0, 2) = "код оборуд."
+    .Offset(0, 3) = "наим. оборуд."
+    .Offset(0, 4) = "модель"
+    .Offset(0, 5) = "норма вренмени"
+    .Offset(0, 6) = "норма обслуживания"
+    .Offset(0, 7) = "Тобор"
+    .Offset(0, 8) = "цех-уч"
+  End With
+  With WrkSht.Range(rngActive, rngActive.Offset(0, 8))
+    .Font.Size = 8
+    .Font.Bold = True
+    .Borders.LineStyle = xlContinuous
+    .HorizontalAlignment = xlVAlignCenter
+    .VerticalAlignment = xlVAlignCenter
+    .RowHeight = 32
+  End With
+  s = "SELECT qwrKTD15.* FROM qwrKTD15 WHERE (((qwrKTD15.DET)='" + DET + "'))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  i = 0
+  If rst.EOF = False Then
+    Do Until rst.EOF = True
+      i = i + 1
+      Set rngActive = WrkSht.Cells(ip1 + i, 1)
+      rngActive.Activate
+      For j = 0 To (rst.Fields.Count - 2)
+        rngActive.Offset(0, j).Value = rst.Fields(j).Value
+      Next j
+      WrkSht.Range(rngActive, rngActive.Offset(0, 8)).Borders.LineStyle = xlContinuous
+      rst.MoveNext
+    Loop
+  End If
+  ip1 = ip1 + i + 2
+  rst.Close
+  
+  'Выгрузка данных из Search
+  ip2 = ip2 + 1
+  Set rngActive = WrkSht.Cells(ip2, 11)
+  rngActive.Activate
+  rngActive = "Search"
+  rngActive.Font.Bold = True
+  With WrkSht.Range(rngActive, rngActive.Offset(0, 27))
+    .Merge
+    .HorizontalAlignment = xlVAlignCenter
+    .VerticalAlignment = xlVAlignCenter
+    .Font.ColorIndex = 48
+  End With
+  ip2 = ip2 + 1
+  Set rngActive = WrkSht.Cells(ip2, 11)
+  rngActive.Activate
+  With rngActive
+    .Value = "код опер."
+    .Offset(0, 1) = "наим. опер."
+    .Offset(0, 2) = "Kопк"
+    .Offset(0, 3) = "код оборуд. А148"
+    .Offset(0, 4) = "код оборуд. РГЦ"
+    .Offset(0, 5) = "наим. оборуд."
+    .Offset(0, 6) = "модель"
+    .Offset(0, 7) = "норма вренмени"
+    .Offset(0, 8) = "цех"
+    .Offset(0, 9) = "ODoc"
+    .Offset(0, 10) = "NDoc"
+    .Offset(0, 11) = "Bтех"
+    .Offset(0, 12) = "Размер партии"
+    .Offset(0, 13) = "признак"
+    .Offset(0, 14) = "оп. старая"
+    .Offset(0, 15) = "участок"
+    .Offset(0, 16) = "вид обработки"
+    .Offset(0, 17) = "профес."
+    .Offset(0, 18) = "норма обслуж."
+    .Offset(0, 19) = "уров мех."
+    .Offset(0, 20) = "разряд"
+    .Offset(0, 21) = "харак. норм.вр."
+    .Offset(0, 22) = "сист. опл."
+    .Offset(0, 23) = "расценок"
+    .Offset(0, 24) = "допл. основн."
+    .Offset(0, 25) = "допл. вредн."
+    .Offset(0, 26) = "тариф"
+    .Offset(0, 27) = "вид оплат"
+  End With
+  With WrkSht.Range(rngActive, rngActive.Offset(0, 27))
+    .Font.Size = 8
+    .Font.Bold = True
+    .Borders.LineStyle = xlContinuous
+    .HorizontalAlignment = xlVAlignCenter
+    .VerticalAlignment = xlVAlignCenter
+    .RowHeight = 32
+  End With
+  s = "SELECT qwrSerch.* FROM qwrSerch WHERE (((qwrSerch.DET2)='" + DET + "'))"
+  Set rst = CurrentDb.OpenRecordset(s)
+  i = 0
+  If rst.EOF = False Then
+    Do Until rst.EOF = True
+      i = i + 1
+      Set rngActive = WrkSht.Cells(ip2 + i, 11)
+      rngActive.Activate
+      For j = 0 To (rst.Fields.Count - 2)
+        rngActive.Offset(0, j).Value = rst.Fields(j).Value
+      Next j
+      WrkSht.Range(rngActive, rngActive.Offset(0, 27)).Borders.LineStyle = xlContinuous
+      rst.MoveNext
+    Loop
+  End If
+  ip2 = ip2 + i + 2
+  rst.Close
+
+
+rs.MoveNext
+Loop
+rs.Close
+  
+  
+  'Установка ширины полей
+  WrkSht.Cells.Select
+  WrkSht.Cells.EntireColumn.AutoFit
+  WrkSht.Cells.NumberFormat = "@"
+  WrkSht.Cells.WrapText = True
+  WrkSht.Range("K1").ColumnWidth = 6
+  WrkSht.Range("L1").ColumnWidth = 15
+  WrkSht.Range("M1").ColumnWidth = 4
+  WrkSht.Range("N1").ColumnWidth = 10
+  WrkSht.Range("O1").ColumnWidth = 10
+  WrkSht.Range("P1").ColumnWidth = 20
+  WrkSht.Range("Q1").ColumnWidth = 25
+  WrkSht.Range("R1").ColumnWidth = 6
+  WrkSht.Range("S1").ColumnWidth = 3
+  WrkSht.Range("T1").ColumnWidth = 15
+  WrkSht.Range("U1").ColumnWidth = 15
+  WrkSht.Range("V1").ColumnWidth = 5
+  WrkSht.Range("W1").ColumnWidth = 2
+  WrkSht.Range("X1").ColumnWidth = 3
+  WrkSht.Range("Y1").ColumnWidth = 3
+  WrkSht.Range("Z1").ColumnWidth = 2
+  WrkSht.Range("AA1").ColumnWidth = 5
+  WrkSht.Range("AB1").ColumnWidth = 5
+  WrkSht.Range("AC1").ColumnWidth = 3
+  WrkSht.Range("AD1").ColumnWidth = 1
+  WrkSht.Range("AE1").ColumnWidth = 1
+  WrkSht.Range("AF1").ColumnWidth = 1
+  WrkSht.Range("AG1").ColumnWidth = 1
+  WrkSht.Range("AH1").ColumnWidth = 9
+  WrkSht.Range("AI1").ColumnWidth = 2
+  WrkSht.Range("AJ1").ColumnWidth = 2
+  WrkSht.Range("AK1").ColumnWidth = 1
+  WrkSht.Range("AL1").ColumnWidth = 3
+  
+  'Скрытие лишних полей
+  If Me.cfg1.Value = False Then
+    WrkSht.Range("A1").ColumnWidth = 0
+    WrkSht.Range("K1").ColumnWidth = 0
+  End If
+  If Me.cfg2.Value = False Then
+    WrkSht.Range("B1").ColumnWidth = 0
+    WrkSht.Range("L1").ColumnWidth = 0
+  End If
+  If Me.cfg3.Value = False Then
+    WrkSht.Range("C1").ColumnWidth = 0
+    WrkSht.Range("N1").ColumnWidth = 0
+    WrkSht.Range("O1").ColumnWidth = 0
+  End If
+  If Me.cfg4.Value = False Then
+    WrkSht.Range("D1").ColumnWidth = 0
+    WrkSht.Range("P1").ColumnWidth = 0
+  End If
+  If Me.cfg5.Value = False Then
+    WrkSht.Range("E1").ColumnWidth = 0
+    WrkSht.Range("Q1").ColumnWidth = 0
+  End If
+  If Me.cfg6.Value = False Then
+    WrkSht.Range("F1").ColumnWidth = 0
+    WrkSht.Range("G1").ColumnWidth = 0
+    WrkSht.Range("R1").ColumnWidth = 0
+  End If
+  If Me.cfg7.Value = False Then
+    WrkSht.Range("H1").ColumnWidth = 0
+  End If
+  If Me.cfg8.Value = False Then
+    WrkSht.Range("I1").ColumnWidth = 0
+    WrkSht.Range("S1").ColumnWidth = 0
+  End If
+  If Me.cfg9.Value = False Then
+    WrkSht.Range("T1").ColumnWidth = 0
+    WrkSht.Range("U1").ColumnWidth = 0
+  End If
+  If Me.cfg10.Value = False Then
+    WrkSht.Range("V1").ColumnWidth = 0
+  End If
+  If Me.cfg11.Value = False Then
+    WrkSht.Range("W1").ColumnWidth = 0
+  End If
+  If Me.cfg12.Value = False Then
+    WrkSht.Range("M1").ColumnWidth = 0
+  End If
+  If Me.cfg13.Value = False Then
+    WrkSht.Range("X1").ColumnWidth = 0
+    WrkSht.Range("Y1").ColumnWidth = 0
+    WrkSht.Range("Z1").ColumnWidth = 0
+    WrkSht.Range("AA1").ColumnWidth = 0
+    WrkSht.Range("AB1").ColumnWidth = 0
+    WrkSht.Range("AC1").ColumnWidth = 0
+    WrkSht.Range("AD1").ColumnWidth = 0
+    WrkSht.Range("AE1").ColumnWidth = 0
+    WrkSht.Range("AF1").ColumnWidth = 0
+    WrkSht.Range("AG1").ColumnWidth = 0
+    WrkSht.Range("AH1").ColumnWidth = 0
+    WrkSht.Range("AI1").ColumnWidth = 0
+    WrkSht.Range("AJ1").ColumnWidth = 0
+    WrkSht.Range("AK1").ColumnWidth = 0
+    WrkSht.Range("AL1").ColumnWidth = 0
+  End If
+  
+  'Настройки страницы для печати
+  With WrkSht.PageSetup
+    .LeftMargin = 0
+    .RightMargin = 0
+    .TopMargin = 0
+    .BottomMargin = 0
+    .HeaderMargin = 0
+    .CenterFooter = "УИТ для ООТиЗ от " & Date
+    .Orientation = xlLandscape
+    .PaperSize = xlPaperA4
+    .Zoom = False
+    .FitToPagesWide = 2
+    .FitToPagesTall = 1
+  End With
+  
+  'Завершение выгрузки
+  Set WrkSht = Nothing
+  Set WrkBk = Nothing
+  Set ExlDb = Nothing
+
+End Sub
