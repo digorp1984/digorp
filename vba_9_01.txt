@@ -1,0 +1,49 @@
+Private Sub pereschetNomera2()
+Dim nachNN, nn As Integer
+Dim nachStr As String
+'Пересчитывает порядковый номер в таблице заказчиков
+
+  s = "SELECT Т_Заказчики.Nomer, Т_Заказчики.Zakaz FROM Т_Заказчики ORDER BY Т_Заказчики.Nomer"
+  Set rst = CurrentDb.OpenRecordset(s)
+  nachNN = 0
+  nachStr = ""
+  If rst.EOF = False Then
+    rst.MoveFirst
+    i = 0
+    Do Until rst.EOF = True
+      nn = 0
+      If rst.Fields("Nomer") = nachNN Then
+        nn = MsgBox("Было обнаруженно два одинаковых номера," + Chr(13) + _
+                             "   выберите какой заказчик будет первым" + Chr(13) + _
+                             "(ДА). " + nachStr + Chr(13) + _
+                             "                           или" + Chr(13) + _
+                             "(НЕТ). " + CStr(rst.Fields("Zakaz")), vbYesNo, "Внимание")
+      End If
+      If nn = 7 Then
+        rst.MovePrevious
+        rst.Edit
+        i = rst.Fields("Nomer")
+        rst.Fields("Nomer") = rst.Fields("Nomer") + 1
+        rst.Update
+        nachNN = rst.Fields("Nomer")
+        nachStr = rst.Fields("Zakaz")
+        rst.MoveNext
+        rst.Edit
+        rst.Fields("Nomer") = i
+        rst.Update
+        i = i + 1
+        rst.MoveNext
+      Else
+        nachNN = rst.Fields("Nomer")
+        nachStr = rst.Fields("Zakaz")
+        i = i + 1
+        rst.Edit
+        rst.Fields("Nomer") = i
+        rst.Update
+        rst.MoveNext
+      End If
+    Loop
+  End If
+  rst.Close
+
+End Sub
