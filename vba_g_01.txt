@@ -1,0 +1,22 @@
+Sub deleteRow()
+Dim n, nom As Integer
+Dim t As String
+'Удаление выбранной строки
+  
+  On Error GoTo err2
+    ActiveDocument.Unprotect ("")
+    '-----------------------------------
+    n = Selection.Information(wdEndOfRangeRowNumber)
+    If n > 6 Then t = ActiveDocument.Tables(1).Cell(n, 1).Range.Text Else t = "0_"
+    nom = CInt(Left(t, Len(t) - 1))
+    If nom > 1 Then
+      Selection.Rows.Delete
+      Call nomStr
+    Else
+      MsgBox "Нельзя удалять первую строку", vbCritical, "Ошибка:"
+    End If
+    '-----------------------------------
+    ActiveDocument.Protect Password:="", NoReset:=True, Type:=wdAllowOnlyFormFields
+err2:
+
+End Sub
