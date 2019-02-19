@@ -1,0 +1,212 @@
+//Рассылка уведомлений на отпуск
+
+&НаКлиентеНаСервереБезКонтекста
+Процедура ВыполнитьРассылкуВЛотус(Параметры, МассивДанных)
+	
+	// инициализация лотус
+	ЛотусСессия = Новый COMОбъект("Lotus.NotesSession");
+	
+	Отказ = Ложь;
+	Попытка
+		ЛотусСессия.Initialize(Параметры.ПарольLotus);
+	Исключение
+		ОбщегоНазначенияКлиентСервер.СообщитьПользователю("Ошибка соединения с Lotus Notes.", , , ,Отказ);
+	КонецПопытки;
+	
+	Если Отказ Тогда
+		Возврат;
+	КонецЕсли;
+	
+	// параметры
+	db = ЛотусСессия.Getdatabase("LOTUSG", "ALL\PrivateCab.NSF", False);
+	//db = ЛотусСессия.Getdatabase("LOTUSR", "adonoy\PrivateCab.nsf", False); //тестовая база
+	ofkdb = ЛотусСессия.Getdatabase("LOTUSG", "ALL\ofkbank.NSF", False);
+	
+	If Not ofkdb.isopen = true Then
+		ОбщегоНазначенияКлиентСервер.СообщитьПользователю("БД ""Сотрудники ОФК"" не найдена по пути ""ALL\ofkbank.NSF");
+		Возврат;
+	EndIf;	
+	
+	tView=ofkdb.Getview("PersonbyTabNumber_1C");
+		
+	//уникальные пользователи
+	ТабельныйНомерГордеевНН = "539"; // для теста - 680
+	gordeevName = Новый COMSafeArray("VT_BSTR", 1);
+	gordeevName.SetValue(0, "Nikolay N Gordeev/OFKBANK/RU"); // для теста - Aleksandr E Ermakov/OFKBANK/RU
+	
+	//идентификатор общей ошибки
+	isErrorFlag = 0;
+	
+	// массив для полей доступа (ридер, эдитор)
+	users_for_access = Новый COMSafeArray("VT_BSTR", 1);
+	users_for_access.SetValue(0, "[HR_Editor]");
+	
+	// создадим документ для записи ошибок
+	error_doc=db.Createdocument(); 
+	error_doc.Replaceitemvalue("Form", "Memo");
+	error_doc.Replaceitemvalue("Subject", "Ошибки выгрузки уведомлений об отпуске!");
+	error_doc.Replaceitemvalue("From", "1С:Зарплата и Управление Предприятием");
+	error_doc.Replaceitemvalue("SendTo", ЛотусСессия.username);
+	error_rtitem = error_doc.Createrichtextitem("Body");
+	
+	// отправка данных
+	Для Каждого СтрокаДанных Из МассивДанных Цикл
+		
+		//определим массивы пользователей для отправки
+		КолвоДополнительныхРолей = 1;
+		Если СтрокаДанных.ТабНомерРук = "" Тогда
+			КолвоДополнительныхРолей = 0;
+		КонецЕсли;
+		
+		user_mass = Новый COMSafeArray("VT_BSTR", 2 + КолвоДополнительныхРолей);
+		user_mass.SetValue(0, ЛотусСессия.username);
+		
+		user_send = Новый COMSafeArray("VT_BSTR", 1 + КолвоДополнительныхРолей);
+		
+		//ищем руководителя
+		Если НЕ СтрокаДанных.ТабНомерРук = "" Тогда
+			
+			ТабСПрефиксом = СокрЛП(Параметры.Префикс) + СтрокаДанных.ТабНомерРук;
+			coll = tView.Getalldocumentsbykey(ТабСПрефиксом, true);
+			
+			Если coll.Count>0 Тогда
+				persondoc=coll.Getfirstdocument();
+				rukovoditelName=persondoc.Getitemvalue("LotusName");
+				Если ТабСПрефиксом = ТабельныйНомерГордеевНН Тогда
+					rukovoditelName=gordeevName;
+				КонецЕсли;
+				user_mass.SetValue(2, rukovoditelName.GetValue(0));
+				user_send.SetValue(1, rukovoditelName.GetValue(0));
+			КонецЕсли;
+			
+		КонецЕсли;
+		
+		//ищем сотрудника
+		ТабСПрефиксом = СокрЛП(Параметры.Префикс) + СтрокаДанных.ТабНомер;
+		coll = tView.Getalldocumentsbykey(ТабСПрефиксом, true);
+		
+		Если coll.Count>0 Тогда
+			
+			persondoc=coll.Getfirstdocument();
+			userName=persondoc.Getitemvalue("LotusName");
+			Если ТабСПрефиксом = ТабельныйНомерГордеевНН Тогда
+				userName=gordeevName;
+			КонецЕсли;
+			
+			user_mass.SetValue(1, userName.GetValue(0));
+			user_send.SetValue(0, userName.GetValue(0));
+			
+			Если userName.GetValue(0)="" Тогда 
+				
+				error_rtitem.Appendtext("Табельный номер № "+persondoc.Getitemvalue("TabelNumber").GetValue(0)+" ");
+				error_rtitem.Appendtext("Лотусовое имя для сотрудника "+persondoc.Getitemvalue("LastName").GetValue(0)+" "+persondoc.Getitemvalue("FirstName").GetValue(0)+" "+persondoc.Getitemvalue("MiddleName").GetValue(0)+" не задано!");
+				error_rtitem.Appenddoclink(persondoc,"");
+				error_rtitem.Addnewline(1);
+				
+				isErrorFlag=1;
+				Продолжить;
+				
+			КонецЕсли;	
+			
+			//формируем документ уведомления
+			doc = db.Createdocument();
+			doc.Replaceitemvalue("Form", "HolidaysNote");
+			success = doc.ComputeWithForm(False, False);
+			
+			Если success Тогда
+				
+				//прикрепление файла к документу
+				rtitem = doc.GetFirstItem("Body");
+				rtitem.Remove();
+				rtitem = doc.CreateRichTextItem("Body");
+				rtitem.isencrypted = true;
+				If ( rtitem.Type = 1 ) Тогда
+					Если СтрокаДанных.ЕстьУведомление = Истина Тогда
+						object = rtitem.EmbedObject(1454, "", СтрокаДанных.Фаил);
+					КонецЕсли;
+					Если СтрокаДанных.ЕстьПриказ = Истина Тогда
+						object = rtitem.EmbedObject(1454, "", СтрокаДанных.ФаилПриказа);
+					КонецЕсли;
+				КонецЕсли;						
+				
+				//параметры документа
+				doc.Replaceitemvalue("FIO", 				СтрокаДанных.ФИОСотрудника);
+				doc.Replaceitemvalue("TabelNumber", 		СтрокаДанных.ТабНомер);
+				doc.Replaceitemvalue("MounthDate", 			Формат(СтрокаДанных.ДатаНачала, "ДФ=MMMM"));       
+				doc.Replaceitemvalue("YearDate", 			Формат(СтрокаДанных.ДатаНачала, "ДФ=yyyy"));
+				doc.Replaceitemvalue("ExecDate", 			СтрокаДанных.ДатаВыгрузки);
+				doc.Replaceitemvalue("HolidaysBeginDate", 	Формат(СтрокаДанных.ДатаНачала, "ДФ=dd.MM.yyyy"));
+				doc.Replaceitemvalue("HolidaysEndDate", 	Формат(СтрокаДанных.ДатаОкончания, "ДФ=dd.MM.yyyy"));
+				doc.Replaceitemvalue("Enterprise", 			Параметры.ОрганизацияСокрНаименование);
+				
+				//роли
+				doc.Replaceitemvalue("PublicEncryptionKeys", user_mass);
+				doc.Replaceitemvalue("WhoIsReader", users_for_access);
+				doc.Replaceitemvalue("WhoIsAuthor", user_mass);			
+				doc.Replaceitemvalue("WhoIsFillialsEditor", "[HR_Editor]");
+				
+				//шифруем и записываем документ
+				Попытка
+					doc.Encrypt();
+					doc.Save(True, True);
+				Исключение
+					
+					error_rtitem.Appendtext("Ошибка при шифровании файлов по сотруднику " + СтрокаДанных.ФИОСотрудника);
+					error_rtitem.Addnewline(1);
+					
+					isErrorFlag=1;
+					Продолжить;
+					
+				КонецПопытки;
+				
+				//Формируем письмо для сотрудника + рук. подразделения
+				maildoc=db.Createdocument();
+				maildoc.Replaceitemvalue("Form", "Memo");
+				maildoc.Replaceitemvalue("Subject", "Уведомление об отпуске от  " + Формат(Параметры.ДатаУведомления, "ДФ=dd.MM.yyyy"));
+				maildoc.Replaceitemvalue("From", "1С:Зарплата и Управление Предприятием");
+				maildoc.Replaceitemvalue("SendTo", user_send);
+				
+				memo_rtitem = maildoc.Createrichtextitem("Body");
+				memo_rtitem.Appendtext("Уведомление об отпуске от  " + Формат(Параметры.ДатаУведомления, "ДФ=dd.MM.yyyy") + ".");
+				memo_rtitem.Addnewline(1);
+				memo_rtitem.Appendtext("ФИО: " + СокрЛП(СтрокаДанных.ФИОСотрудника) + ".");
+				memo_rtitem.Addnewline(1);
+				memo_rtitem.Appendtext("отпуск с " + Формат(СтрокаДанных.ДатаНачала, "ДФ=dd.MM.yyyy") + " по " + Формат(СтрокаДанных.ДатаОкончания, "ДФ=dd.MM.yyyy"));
+				memo_rtitem.Addnewline(1);
+				memo_rtitem.Appendtext("   ");
+				memo_rtitem.Appenddoclink(doc,"Ссылка на: Уведомление об отпуске + Заявление.", "Нажмите на ссылку для того, чтобы открыть документы.");
+				
+				Попытка
+					maildoc.Send(false);
+				Исключение
+					
+					error_rtitem.Appendtext("Ошибка при отправке письма сотруднику " + СтрокаДанных.ФИОСотрудника);
+					error_rtitem.Addnewline(1);
+					
+					isErrorFlag=1;
+					Продолжить;
+					
+				КонецПопытки;
+				
+				//регистрируем отправку
+				СтрокаДанных.Отправлено = Истина;
+				
+			EndIf;
+		
+		ИначеЕсли coll.Count = 0 Тогда
+			
+			error_rtitem.Appendtext("Табельный номер " + СтрокаДанных.ТабНомер + " сотрудника " + СтрокаДанных.ФИОСотрудника + " не найден!");
+			error_rtitem.Addnewline(1);
+			
+			isErrorFlag=1;
+			
+		КонецЕсли;
+		
+	КонецЦикла;
+	
+	// отправляем протокол ошибок, если ошибки были 
+	Если isErrorFlag = 1 Тогда
+		error_doc.Send(False);
+	КонецЕсли;
+	
+КонецПроцедуры
