@@ -1,0 +1,56 @@
+/* Дебов Игорь, 2019 год */
+/* процедуры обработки навигации */
+
+$(document).ready(function() {
+	
+	//обработка основного меню
+	$(".nav-overlay-button").click(function(event) {
+		
+		event.preventDefault();
+		$("html").toggleClass("nav-overlay-on");
+		
+	});
+	
+	//открытие нужного блока (вычисляется из id элемента)
+	$(".media-element-a").click(function(event) {
+		
+		var clickId = $(this).attr("id");
+		var IdOpen = "#" + clickId + "open";
+		
+		//проверка
+		if(clickId.substring(0, 8)=="statlink"){
+			return;
+		}
+		
+		//отмена действия по умолчанию
+		event.preventDefault();
+		
+		//закроем оглавление (быстро)
+		$("#blokchain00").toggle();
+		
+		//откроем выбранный блок (медленно)
+		$(IdOpen).slideToggle();
+	});
+	
+	//возврат к оглавлению
+	$(".button-return-back").click(function(event) {
+		
+		event.preventDefault();
+		
+		//закроем открытые блоки (быстро) (на странице максимум 8 блоков)
+		for (var idElement = 1; idElement <= 8; idElement++) {
+			
+			var idElementTxt = String(idElement);
+			idElementTxt = "#link0" + idElementTxt + "open";
+			
+			if($(idElementTxt).css("display")=="block"){
+				$(idElementTxt).toggle();
+			}
+			
+		}
+		
+		//откроем оглавление (медленно)
+		$("#blokchain00").slideToggle();
+	});	
+
+});
